@@ -317,3 +317,6 @@ pyrightconfig.json
 
 # exclude *.pdf
 *.pdf
+
+# exclude /code_analysis/github_repositories
+/code_analysis/github_repositories
