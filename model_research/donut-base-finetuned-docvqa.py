@@ -21,7 +21,8 @@ def evaluate_qa(model_name, dataset):
         task,
         model=model_name,
         model_kwargs={"torch_dtype": torch.bfloat16},
-        device="mps"
+        # device="mps"
+        device="cuda"
     )
     pipe.model.eval()
 

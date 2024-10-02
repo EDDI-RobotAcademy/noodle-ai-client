@@ -1,7 +1,8 @@
 from transformers import TextStreamer, AutoModelForCausalLM, AutoTokenizer
 import torch
 
-device = "mps" if torch.backends.mps.is_available() else "cpu"
+# device = "mps" if torch.backends.mps.is_available() else "cpu"
+device = "cuda" if torch.backends.mps.is_available() else "cpu"
 
 model_id = "facebook/xglm-564M"
 
