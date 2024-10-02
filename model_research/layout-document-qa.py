@@ -16,7 +16,8 @@ metric = load("rouge")
 
 def evaluate_qa(model_name, dataset):
     print("Start evaluating QA")
-    pipe = pipeline(task, model=model_name, device="mps")
+    # pipe = pipeline(task, model=model_name, device="mps")
+    pipe = pipeline(task, model=model_name, device="cuda")
 
     references = []
     answers = []
