@@ -14,3 +14,6 @@ class GenerateBacklogRepository(ABC):
     def joinDocumentToDocs(self, document):
         pass
 
+    @abstractmethod
+    def generateBacklogsText(self, docs):
+        pass

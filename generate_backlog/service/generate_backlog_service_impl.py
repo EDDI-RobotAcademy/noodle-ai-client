@@ -39,3 +39,5 @@ class GenerateBacklogServiceImpl(GenerateBacklogService):
         loader = self.__generateBacklogRepository.createLoader(githubRepositoryPath)
         document = self.__generateBacklogRepository.loadDocument(loader)
         docs = self.__generateBacklogRepository.joinDocumentToDocs(document)
+
+        generatedBacklogsText = self.__generateBacklogRepository.generateBacklogsText(docs)
