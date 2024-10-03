@@ -9,3 +9,8 @@ class GenerateBacklogRepository(ABC):
     @abstractmethod
     def loadDocument(self, loader):
         pass
+
+    @abstractmethod
+    def joinDocumentToDocs(self, document):
+        pass
+

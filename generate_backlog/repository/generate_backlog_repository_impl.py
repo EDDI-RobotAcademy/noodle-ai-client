@@ -35,3 +35,7 @@ class GenerateBacklogRepositoryImpl(GenerateBacklogRepository):
 
     def loadDocument(self, loader):
         return loader.load()
+
+    def joinDocumentToDocs(self, document):
+        return "\n".join([document[i].page_content for i in range(len(document))])
+
