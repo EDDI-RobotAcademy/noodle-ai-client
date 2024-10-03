@@ -6,3 +6,6 @@ class GenerateBacklogRepository(ABC):
     def createLoader(self, githubRepositoryPath):
         pass
 
+    @abstractmethod
+    def loadDocument(self, loader):
+        pass

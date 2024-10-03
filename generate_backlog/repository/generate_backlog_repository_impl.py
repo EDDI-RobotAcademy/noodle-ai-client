@@ -33,3 +33,5 @@ class GenerateBacklogRepositoryImpl(GenerateBacklogRepository):
 
         return loader
 
+    def loadDocument(self, loader):
+        return loader.load()

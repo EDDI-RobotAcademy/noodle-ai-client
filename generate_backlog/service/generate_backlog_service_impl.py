@@ -37,3 +37,4 @@ class GenerateBacklogServiceImpl(GenerateBacklogService):
         githubRepositoryPath = f"./github_repositories/{githubRepositoryName}"
 
         loader = self.__generateBacklogRepository.createLoader(githubRepositoryPath)
+        document = self.__generateBacklogRepository.loadDocument(loader)
