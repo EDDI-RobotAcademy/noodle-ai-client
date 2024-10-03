@@ -41,3 +41,6 @@ class GenerateBacklogServiceImpl(GenerateBacklogService):
         docs = self.__generateBacklogRepository.joinDocumentToDocs(document)
 
         generatedBacklogsText = self.__generateBacklogRepository.generateBacklogsText(docs)
+        backlogList = self.__textProcessingRepository.postprocessingTextToBacklogs(generatedBacklogsText)
+
+        return {"backlogList": backlogList}
