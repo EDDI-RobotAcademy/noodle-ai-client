@@ -41,6 +41,11 @@ class GenerateBacklogServiceImpl(GenerateBacklogService):
         docs = self.__generateBacklogRepository.joinDocumentToDocs(document)
 
         generatedBacklogsText = self.__generateBacklogRepository.generateBacklogsText(docs)
-        backlogList = self.__textProcessingRepository.postprocessingTextToBacklogs(generatedBacklogsText)
+        parsedBacklogText = self.__textProcessingRepository.postprocessingTextToBacklogs(generatedBacklogsText)
+
+        backlogList = []
+
+        for backlogInfo in parsedBacklogText:
+            backlogList.append([backlogInfo["backlogName"],backlogInfo["domainName"], backlogInfo["successCriteria"], backlogInfo["todo"]])
 
         return {"backlogList": backlogList}
