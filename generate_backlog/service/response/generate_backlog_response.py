@@ -3,7 +3,7 @@ from user_defined_protocol.protocol import UserDefinedProtocolNumber
 
 class GenerateBacklogResponse:
     def __init__(self, responseData):
-        self.protocolNumber = UserDefinedProtocolNumber.GENERATE_BACKLOG_PROTOCOL_NUMBER.value
+        self.protocolNumber = UserDefinedProtocolNumber.GENERATE_EXAMPLE_BACKLOG_PROTOCOL_NUMBER.value
 
         for key, value in responseData.items():
             setattr(self, key, value)

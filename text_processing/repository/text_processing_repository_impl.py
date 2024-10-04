@@ -21,34 +21,43 @@ class TextProcessingRepositoryImpl(TextProcessingRepository):
 
     def postprocessingTextToBacklogs(self, generatedBacklogsText):
         # 정규표현식으로 매칭
-        titlePattern = re.compile(r"백로그 제목:\s*(.+)")
-        domainPattern = re.compile(r"도메인 이름:\s*(.+)")
-        successCriteriaPattern = re.compile(r"Success Criteria:\s*(.+)")
-        todoPattern = re.compile(r"To-do:\s*(- .+)", re.DOTALL)
+        # titlePattern = re.compile(r"백로그 제목:\s*(.+)")
+        # domainPattern = re.compile(r"도메인 이름:\s*(.+)")
+        # successCriteriaPattern = re.compile(r"Success Criteria:\s*(.+)")
+        # todoPattern = re.compile(r"To-do:\s*(- .+)", re.DOTALL)
+        #
+        # # 각 백로그는 \n\n으로 구분됨
+        # backlogItems = generatedBacklogsText.strip().split("\n\n")
+        # parsedItems = []
+        #
+        # for item in backlogItems:
+        #     titleMatch = titlePattern.search(item)
+        #     domainMatch = domainPattern.search(item)
+        #     successCriteriaMatch = successCriteriaPattern.search(item)
+        #     todoMatch = todoPattern.search(item)
+        #
+        #     if titleMatch and domainMatch and successCriteriaMatch and todoMatch:
+        #         title = titleMatch.group(1).strip()
+        #         domain = domainMatch.group(1).strip()
+        #         successCriteria = successCriteriaMatch.group(1).strip()
+        #         # To-do 는 '- ' 으로 시작함
+        #         todos = re.findall(r"- [^\n]+", todoMatch.group(1))
+        #
+        #         parsedItems.append({
+        #             "backlogName": title,
+        #             "domainName": domain,
+        #             "successCriteria": successCriteria,
+        #             "todo": todos
+        #         })
+        pattern = re.compile(
+            r"백로그 제목: (.+?)\n\s*- 도메인 이름: (.+?)\n\s*- Success Criteria: (.+?)\n\s*- To-do 목록:(.+?)(?=\n\d|\Z)", re.S)
 
-        # 각 백로그는 \n\n으로 구분됨
-        backlogItems = generatedBacklogsText.strip().split("\n\n")
+        # 추출된 결과 저장
+        backlogs = pattern.findall(generatedBacklogsText)
 
-        parsedItems = []
+        # 추출된 결과 출력
+        for backlog in backlogs:
+            title, domain, criteria, todos = backlog
+            todos_list = re.findall(r"- (.+)", todos)
 
-        for item in backlogItems:
-            titleMatch = titlePattern.search(item)
-            domainMatch = domainPattern.search(item)
-            successCriteriaMatch = successCriteriaPattern.search(item)
-            todoMatch = todoPattern.search(item)
-
-            if titleMatch and domainMatch and successCriteriaMatch and todoMatch:
-                title = titleMatch.group(1).strip()
-                domain = domainMatch.group(1).strip()
-                successCriteria = successCriteriaMatch.group(1).strip()
-                # To-do 는 '- ' 으로 시작함
-                todos = re.findall(r"- [^\n]+", todoMatch.group(1))
-
-                parsedItems.append({
-                    "backlogName": title,
-                    "domainName": domain,
-                    "successCriteria": successCriteria,
-                    "todo": todos
-                })
-
-        return parsedItems
+        return backlogs

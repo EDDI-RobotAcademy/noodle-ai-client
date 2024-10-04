@@ -1,6 +1,7 @@
 from generate_backlog.repository.generate_backlog_repository_impl import GenerateBacklogRepositoryImpl
 from generate_backlog.service.generate_backlog_service import GenerateBacklogService
 from github_processing.repository.github_processing_repository_impl import GithubProcessingRepositoryImpl
+from template.utility.color_print import ColorPrinter
 from text_processing.repository.text_processing_repository_impl import TextProcessingRepositoryImpl
 
 
@@ -23,7 +24,7 @@ class GenerateBacklogServiceImpl(GenerateBacklogService):
 
         return cls.__instance
 
-    def generate(self, *arg, **kwargs):
+    async def generate(self, *arg, **kwargs):
         userName = arg[0]
         githubRepositoryName = arg[1]
         githubBranchName = arg[2]
@@ -32,7 +33,7 @@ class GenerateBacklogServiceImpl(GenerateBacklogService):
         print(f"service -> generate() githubRepositoryName: {githubRepositoryName}")
         print(f"service -> generate() githubBranchName: {githubBranchName}")
 
-        self.__githubProcessingRepository.cloneRespoitory(userName, githubRepositoryName)
+        await self.__githubProcessingRepository.cloneRespoitory(userName, githubRepositoryName)
 
         githubRepositoryPath = f"./github_repositories/{githubRepositoryName}"
 
@@ -40,8 +41,8 @@ class GenerateBacklogServiceImpl(GenerateBacklogService):
         document = self.__generateBacklogRepository.loadDocument(loader)
         docs = self.__generateBacklogRepository.joinDocumentToDocs(document)
 
-        generatedBacklogsText = self.__generateBacklogRepository.generateBacklogsText(docs)
-        parsedBacklogText = self.__textProcessingRepository.postprocessingTextToBacklogs(generatedBacklogsText)
+        generatedBacklogsText = await self.__generateBacklogRepository.generateBacklogsText(docs)
+        parsedBacklogText = await self.__textProcessingRepository.postprocessingTextToBacklogs(generatedBacklogsText)
 
         backlogList = []
 
@@ -49,3 +50,19 @@ class GenerateBacklogServiceImpl(GenerateBacklogService):
             backlogList.append([backlogInfo["backlogName"],backlogInfo["domainName"], backlogInfo["successCriteria"], backlogInfo["todo"]])
 
         return {"backlogList": backlogList}
+
+    async def example(self, *arg, **kwargs):
+        print(f"service -> example()")
+
+        text = ""
+        with open("/Users/j213h/Jh/SK-Networks-AI-Camp/Projects/Noodle/noodle-ai-client/code_analysis/gpt.txt", "r") as f:
+            text += f.read()
+
+        parsedBacklogText = self.__textProcessingRepository.postprocessingTextToBacklogs(text)
+        backlogList = []
+
+        for backlogInfo in parsedBacklogText:
+            backlogList.append([backlogInfo["backlogName"], backlogInfo["domainName"], backlogInfo["successCriteria"],
+                                backlogInfo["todo"]])
+
+        return {"message": backlogList}

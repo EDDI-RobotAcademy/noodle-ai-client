@@ -37,9 +37,31 @@ class UserDefinedProtocolRegister:
             generateBacklogService.generate
         )
 
+    @staticmethod
+    def registerGenerateExampleBacklogProtocol():
+        customProtocolService = CustomProtocolServiceImpl.getInstance()
+        generateBacklogService = GenerateBacklogServiceImpl.getInstance()
+
+        requestClassMapInstance = RequestClassMap.getInstance()
+        requestClassMapInstance.addRequestClass(
+            UserDefinedProtocolNumber.GENERATE_EXAMPLE_BACKLOG_PROTOCOL_NUMBER,
+            GenerateBacklogRequest
+        )
+
+        responseClassMapInstance = ResponseClassMap.getInstance()
+        responseClassMapInstance.addResponseClass(
+            UserDefinedProtocolNumber.GENERATE_EXAMPLE_BACKLOG_PROTOCOL_NUMBER,
+            GenerateBacklogResponse
+        )
+
+        customProtocolService.registerCustomProtocol(
+            UserDefinedProtocolNumber.GENERATE_EXAMPLE_BACKLOG_PROTOCOL_NUMBER,
+            generateBacklogService.example
+        )
 
 
     @staticmethod
     def registerUserDefinedProtocol():
         UserDefinedProtocolRegister.registerGenerateBacklogProtocol()
+        UserDefinedProtocolRegister.registerGenerateExampleBacklogProtocol()
 
