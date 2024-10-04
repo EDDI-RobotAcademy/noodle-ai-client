@@ -1,4 +1,5 @@
 import os.path
+import shutil
 
 from git import Repo
 
@@ -27,7 +28,7 @@ class GithubProcessingRepositoryImpl(GithubProcessingRepository):
         repositoryPath = f"./github_repositories/{githubRepositoryName}"
 
         if os.path.exists(repositoryPath):
-            os.removedirs(repositoryPath)
+            shutil.rmtree(repositoryPath)
 
         Repo.clone_from(GITHUB_REPOSITORY_URL, to_path=repositoryPath)
 
