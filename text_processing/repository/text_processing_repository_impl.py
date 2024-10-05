@@ -19,45 +19,34 @@ class TextProcessingRepositoryImpl(TextProcessingRepository):
 
         return cls.__instance
 
-    def postprocessingTextToBacklogs(self, generatedBacklogsText):
-        # 정규표현식으로 매칭
-        # titlePattern = re.compile(r"백로그 제목:\s*(.+)")
-        # domainPattern = re.compile(r"도메인 이름:\s*(.+)")
-        # successCriteriaPattern = re.compile(r"Success Criteria:\s*(.+)")
-        # todoPattern = re.compile(r"To-do:\s*(- .+)", re.DOTALL)
-        #
-        # # 각 백로그는 \n\n으로 구분됨
-        # backlogItems = generatedBacklogsText.strip().split("\n\n")
-        # parsedItems = []
-        #
-        # for item in backlogItems:
-        #     titleMatch = titlePattern.search(item)
-        #     domainMatch = domainPattern.search(item)
-        #     successCriteriaMatch = successCriteriaPattern.search(item)
-        #     todoMatch = todoPattern.search(item)
-        #
-        #     if titleMatch and domainMatch and successCriteriaMatch and todoMatch:
-        #         title = titleMatch.group(1).strip()
-        #         domain = domainMatch.group(1).strip()
-        #         successCriteria = successCriteriaMatch.group(1).strip()
-        #         # To-do 는 '- ' 으로 시작함
-        #         todos = re.findall(r"- [^\n]+", todoMatch.group(1))
-        #
-        #         parsedItems.append({
-        #             "backlogName": title,
-        #             "domainName": domain,
-        #             "successCriteria": successCriteria,
-        #             "todo": todos
-        #         })
-        pattern = re.compile(
-            r"백로그 제목: (.+?)\n\s*- 도메인 이름: (.+?)\n\s*- Success Criteria: (.+?)\n\s*- To-do 목록:(.+?)(?=\n\d|\Z)", re.S)
+    async def postprocessingTextToBacklogs(self, generatedBacklogsText):
+        # 각 백로그 항목을 분리하여 반복 처리
+        backlogs = re.split(r'(?=\*\*백로그 제목:\*\*)', generatedBacklogsText)
 
-        # 추출된 결과 저장
-        backlogs = pattern.findall(generatedBacklogsText)
+        # 첫 번째 백로그가 빈 값일 수 있으므로 필터링
+        backlogs = [backlog for backlog in backlogs if backlog.strip()]
 
-        # 추출된 결과 출력
+        # 각 항목에서 정보를 추출하여 리스트에 저장
+        backlogList = []
         for backlog in backlogs:
-            title, domain, criteria, todos = backlog
-            todos_list = re.findall(r"- (.+)", todos)
+            backlogTitle = re.search(r'\*\*백로그 제목:\*\*\s*(.*)', backlog)
+            if backlogTitle is None:
+                continue
+            domainName = re.search(r'\+ 도메인 이름:\s*`(.*)`', backlog)
+            successCriteria = re.search(r'\*\*Success Criteria:\*\*\s*(.*)', backlog)
 
-        return backlogs
+            # To-do 목록에서 "도메인"이나 "Success Criteria"로 시작하는 문장을 제외하고, 앞에 붙은 \t나 공백 제거
+            todoList = re.findall(r'^\s*\d+\.\s*(?!도메인|Success Criteria)(.*)', backlog, re.MULTILINE)
+
+            # 앞에 붙은 탭이나 공백 제거
+            todoList = [todo.strip() for todo in todoList]
+
+            backlog_data = {
+                '백로그 제목': backlogTitle.group(1) if backlogTitle else None,
+                '도메인 이름': domainName.group(1) if domainName else None,
+                'Success Criteria': successCriteria.group(1) if successCriteria else None,
+                'To-do 목록': todoList if todoList else None
+            }
+            backlogList.append(backlog_data)
+
+        return backlogList

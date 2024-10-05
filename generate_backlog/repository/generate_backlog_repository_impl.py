@@ -1,3 +1,6 @@
+import asyncio
+import concurrent.futures
+
 from langchain_community.document_loaders.generic import GenericLoader
 from langchain_community.document_loaders.parsers import LanguageParser
 from langchain_core.output_parsers import StrOutputParser
@@ -24,7 +27,7 @@ class GenerateBacklogRepositoryImpl(GenerateBacklogRepository):
 
         return cls.__instance
 
-    def createLoader(self, githubRepositoryPath):
+    async def createLoader(self, githubRepositoryPath):
         loader = GenericLoader.from_filesystem(
             githubRepositoryPath,
             glob="**/*",
@@ -42,7 +45,18 @@ class GenerateBacklogRepositoryImpl(GenerateBacklogRepository):
     def joinDocumentToDocs(self, document):
         return "\n".join([document[i].page_content for i in range(len(document))])
 
-    def generateBacklogsText(self, docs):
+    def modelCall(self, model, prompt, docs):
+        chain = (
+            {"context": lambda x: docs}
+            | prompt
+            | model
+            | StrOutputParser()
+        )
+
+        result = chain.invoke(input="")
+        return result
+
+    async def generateBacklogsText(self, docs):
         template = """
         1. **도메인 및 기능 분석 요청**
            - "다음은 여러 파이썬 파일의 내용을 합친 텍스트입니다. 
@@ -59,7 +73,7 @@ class GenerateBacklogRepositoryImpl(GenerateBacklogRepository):
              - **Success Criteria:** 기능의 성공을 평가할 수 있는 기준
              - **To-do 목록:** 해당 기능을 구현하기 위해 필요한 단계별 작업
 
-        이 과정을 통해 생성된 백로그 항목들만 출력해 주세요."
+        이 과정을 통해 생성된 백로그 항목들을 예시와 같은 형식으로 출력해 주세요."
 
         ### 최종 출력 예시
 
@@ -103,16 +117,18 @@ class GenerateBacklogRepositoryImpl(GenerateBacklogRepository):
             base_url="http://localhost:1234/v1",
             api_key="lm_studio",
             model="hugging-quants/Llama-3.2-3B-Instruct-Q4_K_M-GGUF",
-            temperature=0.1
+            temperature=0.05
         )
 
-        chain = (
-                {"context": lambda x: docs}
-                | prompt
-                | llm
-                | StrOutputParser()
-        )
+        loop = asyncio.get_running_loop()
 
-        generatedText = chain.invoke(input="")
+        with concurrent.futures.ThreadPoolExecutor() as pool:
+            output = await loop.run_in_executor(
+                pool,
+                self.modelCall,
+                llm,
+                prompt,
+                docs
+            )
 
-        return generatedText
+        return output
