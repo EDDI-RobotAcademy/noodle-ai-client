@@ -1,3 +1,4 @@
+import os
 import re
 
 from text_processing.repository.text_processing_repository import TextProcessingRepository
@@ -50,3 +51,19 @@ class TextProcessingRepositoryImpl(TextProcessingRepository):
             backlogList.append(backlog_data)
 
         return backlogList
+
+    def getTextFromSourceCode(self, githubRepositoryPath):
+        text = ""
+
+        for path, dirs, files in os.walk(githubRepositoryPath):
+            for file in files:
+                name, ext = os.path.splitext(file)
+                if ext == ".py":
+                    filePath = os.path.join(githubRepositoryPath, file)
+                    with open(filePath) as f:
+                        text += f"File: {filePath}\n"
+                        text += f.read()
+                        text += "=" * 80
+                        text += "\n"
+
+        return text
