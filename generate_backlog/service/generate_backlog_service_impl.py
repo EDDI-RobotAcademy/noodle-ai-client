@@ -42,7 +42,7 @@ class GenerateBacklogServiceImpl(GenerateBacklogService):
         ColorPrinter.print_important_message(f"service -> generate() githubBranchName: {githubBranchName}")
 
         ColorPrinter.print_important_message("Before clone a repository.")
-        await self.__githubProcessingRepository.cloneRespoitory(userName, githubRepositoryName)
+        await self.__githubProcessingRepository.cloneRepository(userName, githubRepositoryName)
         ColorPrinter.print_important_message("After clone a repository.")
 
         githubRepositoryPath = f"./github_repositories/{githubRepositoryName}"

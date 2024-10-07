@@ -1,5 +1,8 @@
+import asyncio
+import concurrent.futures
 import os
 import re
+from asyncio import as_completed
 
 from text_processing.repository.text_processing_repository import TextProcessingRepository
 
@@ -52,7 +55,7 @@ class TextProcessingRepositoryImpl(TextProcessingRepository):
 
         return backlogList
 
-    def getTextFromSourceCode(self, githubRepositoryPath):
+    def getText(self, githubRepositoryPath):
         text = ""
 
         for path, dirs, files in os.walk(githubRepositoryPath):
@@ -67,3 +70,11 @@ class TextProcessingRepositoryImpl(TextProcessingRepository):
                         text += "\n"
 
         return text
+
+    async def getTextFromSourceCode(self, githubRepositoryPath):
+        loop = asyncio.get_running_loop()
+
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            output = await loop.run_in_executor(executor, self.getText, githubRepositoryPath)
+
+        return output

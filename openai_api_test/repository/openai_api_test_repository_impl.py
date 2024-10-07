@@ -56,11 +56,14 @@ class OpenAIAPIRepositoryImpl(OpenAIAPIRepository):
         아래 소스코드는 내가 진행한 프로젝트의 전체 소스 코드를 하나의 텍스트로 연결한 파일이야.
         코드: {codeText}
         이 소스코드를 기반으로, 프로젝트 결과 보고서를 만들어줬으면 좋겠어. 나를 도와줄 수 있니?
+        프로젝트 결과 보고서에는 다음 항목들이 반드시 포함되었으면 좋겠어.
+        그리고 각 항목들 이름은 @로 시작하고 @로 끝나도록 작성해서, 해당 내용을 텍스트로 추출하기 용이하도록 작성해야 돼.
+        만약, 입력된 항목이 보고서를 만들기에 부족하다고 생각되면 너가 임의로 내용을 추가해서 결과 보고서를 완성해줘.
         """
 
         prompt = ChatPromptTemplate.from_template(template)
         chain = prompt | llm | StrOutputParser()
-        userInput = {"role": "user", "content": ""}
+        userInput = {"role": "user", "content": input()}
         generatedBacklogText = await chain.ainvoke(input=userInput)
 
         return {"message": generatedBacklogText}
