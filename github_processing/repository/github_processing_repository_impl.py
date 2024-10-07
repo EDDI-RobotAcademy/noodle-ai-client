@@ -1,3 +1,4 @@
+import asyncio
 import os.path
 import shutil
 
@@ -23,7 +24,7 @@ class GithubProcessingRepositoryImpl(GithubProcessingRepository):
 
         return cls.__instance
 
-    async def cloneRespoitory(self, userName, githubRepositoryName):
+    async def cloneRepository(self, userName, githubRepositoryName):
         GITHUB_REPOSITORY_URL = f"{self.GITHUB_URL}/{userName}/{githubRepositoryName}"
         repositoryPath = f"./github_repositories/{githubRepositoryName}"
 

@@ -33,7 +33,7 @@ class OpenAIAPIServiceImpl(OpenAIAPIService):
 
         ColorPrinter.print_important_message(f"service -> generateBacklog() userName: {userName}")
         ColorPrinter.print_important_message(f"service -> generateBacklog() githubRepositoryName: {githubRepositoryName}")
-        await self.__githubProcessingRepository.cloneRespoitory(userName, githubRepositoryName)
+        await self.__githubProcessingRepository.cloneRepository(userName, githubRepositoryName)
         ColorPrinter.print_important_message("After clone repository")
         githubRepositoryPath = f"./github_repositories/{githubRepositoryName}"
 
