@@ -30,6 +30,7 @@ class GithubProcessingRepositoryImpl(GithubProcessingRepository):
 
         if os.path.exists(repositoryPath):
             shutil.rmtree(repositoryPath)
+            await asyncio.sleep(0.5)
 
         Repo.clone_from(GITHUB_REPOSITORY_URL, to_path=repositoryPath)
 
