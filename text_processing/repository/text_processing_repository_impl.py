@@ -3,12 +3,18 @@ import concurrent.futures
 import os
 import re
 from asyncio import as_completed
+from concurrent.futures.thread import ThreadPoolExecutor
 
+import aiofiles
+from PIL.ImageEnhance import Color
+
+from template.utility.color_print import ColorPrinter
 from text_processing.repository.text_processing_repository import TextProcessingRepository
 
 
 class TextProcessingRepositoryImpl(TextProcessingRepository):
     __instance = None
+    executor = ThreadPoolExecutor()
 
     def __new__(cls):
         if cls.__instance is None:
@@ -55,26 +61,31 @@ class TextProcessingRepositoryImpl(TextProcessingRepository):
 
         return backlogList
 
-    def getText(self, githubRepositoryPath):
+    async def process_file(self, filePath):
+        async with aiofiles.open(filePath, mode='r') as f:
+            content = await f.read()
+        return f"File: {filePath}\n{content}{'=' * 80}\n"
+
+
+    async def async_os_walk(self, path):
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(self.executor, list, os.walk(path))
+
+    async def getTextFromSourceCode(self, githubRepositoryPath):
         text = ""
 
-        for path, dirs, files in os.walk(githubRepositoryPath):
+        tasks = []
+        osPath = await self.async_os_walk(githubRepositoryPath)
+        for root, dirs, files in osPath:
             for file in files:
                 name, ext = os.path.splitext(file)
                 if ext == ".py":
-                    filePath = os.path.join(githubRepositoryPath, file)
-                    with open(filePath) as f:
-                        text += f"File: {filePath}\n"
-                        text += f.read()
-                        text += "=" * 80
-                        text += "\n"
+                    filePath = os.path.join(root, file)
+                    tasks.append(self.process_file(filePath))
+
+        results = await asyncio.gather(*tasks)
+
+        for result in results:
+            text += result
 
         return text
-
-    async def getTextFromSourceCode(self, githubRepositoryPath):
-        loop = asyncio.get_running_loop()
-
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            output = await loop.run_in_executor(executor, self.getText, githubRepositoryPath)
-
-        return output

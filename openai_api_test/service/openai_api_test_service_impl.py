@@ -37,10 +37,18 @@ class OpenAIAPIServiceImpl(OpenAIAPIService):
         ColorPrinter.print_important_message("After clone repository")
         githubRepositoryPath = f"./github_repositories/{githubRepositoryName}"
 
-        codeText = self.__textProcessingRepository.getTextFromSourceCode(githubRepositoryPath)
+        codeText = await self.__textProcessingRepository.getTextFromSourceCode(githubRepositoryPath)
+        # ColorPrinter.print_important_message(f"codeText: {codeText}")
         ColorPrinter.print_important_message("After get text from source code")
 
         generatedText = await self.__openaiAPIRepository.generateBacklogText(codeText)
         ColorPrinter.print_important_message("After generate Backlog Text")
+        ColorPrinter.print_important_message(f"generatedText: {generatedText}")
 
-        return generatedText
+        extractedText = self.__openaiAPIRepository.extractSections(generatedText)
+        ColorPrinter.print_important_message(f"extractedText: {extractedText}")
+        result = []
+        for item in extractedText:
+            result.append(extractedText[item])
+
+        return {"message": "0"}
