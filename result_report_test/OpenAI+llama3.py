@@ -5,6 +5,8 @@ import re
 
 import openai
 from dotenv import load_dotenv
+from llama_cpp import Llama
+from transformers import AutoTokenizer
 
 load_dotenv()
 client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -106,3 +108,102 @@ print(extracted_items)
 # json_items = json.dumps({
 #     'backlog_items': extracted_items
 # }, ensure_ascii=False, indent=2)
+
+model_id = 'MLP-KTLim/llama-3-Korean-Bllossom-8B-gguf-Q4_K_M'
+tokenizer = AutoTokenizer.from_pretrained(model_id)
+llm = Llama.from_pretrained(
+	repo_id=model_id,
+	filename="llama-3-Korean-Bllossom-8B-Q4_K_M.gguf",
+    n_gpu_layers=-1,
+    n_ctx=3000,
+    flash_attn=True
+)
+
+generation_kwargs = {
+            "max_tokens": 512,
+            "stop": ["<|eot_id|>"],
+            "top_p": 0.9,
+            "temperature": 0.2,
+            "echo": False,  # Echo the prompt in the output
+            # "stream": True
+        }
+
+# template = f""""You have an Agile backlog generated from the project. "
+#         "Please generate a detailed project report based on this backlog. "
+#         "Highlight the main tasks, success criteria, and overall project structure."
+#         "Please print it out in Korean.\n\n"
+#         f"Backlog:\n{backlogs}\n"
+#         Answer:"""
+template = f"""
+당신은 애자일 프로젝트 관리자이자 기술 문서 작성 전문가입니다. 아래 제공되는 프로젝트 백로그 정보를 바탕으로 상세한 프로젝트 결과 보고서를 작성해주세요.
+
+# 입력 정보
+**프로젝트 기본 정보**
+
+**프로젝트명**: [프로젝트 이름(전체 프로젝트 내용을 포괄하는 하나의 주제를 작성해주세요.)]
+
+**백로그 항목**
+{backlogs}
+# 요청 사항\n
+**다음 구조로 프로젝트 결과 보고서를 작성해주세요**:
+
+**프로젝트 개요**
+
+    - 목적 및 목표
+    - 주요 이해관계자
+    - 전반적인 접근 방식
+
+**주요 성과**
+
+    - 각 백로그 항목별 구현 결과
+    - 성공 기준 달성 여부
+    - 주요 기술적 결정사항
+
+
+**프로젝트 지표**
+
+    - 계획 대비 실제 구현 비율
+    - 품질 메트릭스 (테스트 커버리지, 버그 수 등)
+    - 성능 지표
+
+
+**도전 과제 및 해결 방안**
+
+    - 직면한 주요 기술적 문제
+    - 채택한 해결 방안
+    - 학습된 교훈
+
+
+**향후 개선사항**
+
+    - 추가 개발이 필요한 영역
+    - 확장 가능성
+    - 유지보수 고려사항
+
+
+**톤앤매너**
+
+    - 전문적이고 객관적인 어조 유지
+    - 기술적 내용과 비즈니스 가치를 균형있게 서술
+    - 구체적인 예시와 데이터 포함
+
+**특별 지침**
+
+    - 각 백로그 항목의 성공 기준을 기반으로 구현 결과를 평가해주세요
+    - 기술적 용어는 필요한 경우 간단한 설명을 덧붙여주세요"""
+
+messages = [
+            {"role": "system", "content": f"{PROMPT}"},
+            {"role": "user", "content": f"{template}"}
+]
+
+prompt = tokenizer.apply_chat_template(
+    messages,
+    tokenize=False,
+    add_generation_prompt=True
+)
+
+response_msg = llm(prompt, **generation_kwargs)
+
+response_text = response_msg['choices'][0]['text']
+print(response_text)
