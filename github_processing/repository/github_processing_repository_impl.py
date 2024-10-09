@@ -28,9 +28,8 @@ class GithubProcessingRepositoryImpl(GithubProcessingRepository):
         GITHUB_REPOSITORY_URL = f"{self.GITHUB_URL}/{userName}/{githubRepositoryName}"
         repositoryPath = f"./github_repositories/{githubRepositoryName}"
 
-        if os.path.exists(repositoryPath):
-            shutil.rmtree(repositoryPath)
-            await asyncio.sleep(0.5)
-
         Repo.clone_from(GITHUB_REPOSITORY_URL, to_path=repositoryPath)
 
+    async def deleteRepository(self, githubRepositoryPath):
+        shutil.rmtree(githubRepositoryPath)
+        await asyncio.sleep(0.5)

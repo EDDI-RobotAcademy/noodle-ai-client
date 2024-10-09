@@ -82,10 +82,32 @@ class UserDefinedProtocolRegister:
             openaiAPITestService.generateBacklog
         )
 
+    @staticmethod
+    def registerOpenAIBacklogProtocol():
+        customProtocolService = CustomProtocolServiceImpl.getInstance()
+        generateBacklogService = GenerateBacklogServiceImpl.getInstance()
+
+        requestClassMapInstance = RequestClassMap.getInstance()
+        requestClassMapInstance.addRequestClass(
+            UserDefinedProtocolNumber.GENERATE_EXAMPLE_BACKLOG_PROTOCOL_NUMBER,
+            GenerateBacklogRequest
+        )
+
+        responseClassMapInstance = ResponseClassMap.getInstance()
+        responseClassMapInstance.addResponseClass(
+            UserDefinedProtocolNumber.GENERATE_EXAMPLE_BACKLOG_PROTOCOL_NUMBER,
+            GenerateBacklogResponse
+        )
+
+        customProtocolService.registerCustomProtocol(
+            UserDefinedProtocolNumber.GENERATE_EXAMPLE_BACKLOG_PROTOCOL_NUMBER,
+            generateBacklogService.generateBacklogByOpenAI
+        )
+
 
     @staticmethod
     def registerUserDefinedProtocol():
         UserDefinedProtocolRegister.registerGenerateBacklogProtocol()
         UserDefinedProtocolRegister.registerGenerateExampleBacklogProtocol()
         UserDefinedProtocolRegister.registerOpenAIAPITestProtocol()
-
+        UserDefinedProtocolRegister.registerOpenAIBacklogProtocol()

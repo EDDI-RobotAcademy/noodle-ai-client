@@ -4,7 +4,7 @@ from user_defined_protocol.protocol import UserDefinedProtocolNumber
 
 class GenerateBacklogRequest(BaseRequest):
     def __init__(self, **kwargs):
-        self.__protocolNumber = UserDefinedProtocolNumber.GENERATE_BACKLOG_PROTOCOL_NUMBER.value
+        self.__protocolNumber = UserDefinedProtocolNumber.OPENAI_BACKLOG_PROTOCOL_NUMBER.value
         self.parameterList = kwargs.get('data', [])
 
     def getProtocolNumber(self):

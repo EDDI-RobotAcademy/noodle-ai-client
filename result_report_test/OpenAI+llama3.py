@@ -19,7 +19,9 @@ You are a helpful AI assistant, you'll need to answer users' queries in a friend
 def create_backlog_with_openai(source_code):
     prompt = (
         "You are generating an Agile backlog from the following source code. "
-        "Each backlog item should include a title, success criteria, domain separation, and task list.\n\n"
+        "Each backlog item should include a title, success criteria, domain separation, and task list."
+        "Additionally, please make a list of the language and frameworks based on the source code."
+        "Lastly, if there is anything more to supplement among the code contents, please write it down.\n\n"
         f"Source code:\n{source_code}\n"
     )
 
@@ -152,6 +154,10 @@ template = f"""
     - 목적 및 목표
     - 주요 이해관계자
     - 전반적인 접근 방식
+    
+**개발 환경**
+    - 언어 및 프레임워크
+    
 
 **주요 성과**
 

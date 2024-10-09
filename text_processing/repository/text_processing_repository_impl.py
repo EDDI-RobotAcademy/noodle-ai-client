@@ -62,9 +62,11 @@ class TextProcessingRepositoryImpl(TextProcessingRepository):
         return backlogList
 
     async def process_file(self, filePath):
-        async with aiofiles.open(filePath, mode='r') as f:
+        async with aiofiles.open(filePath, mode='r', encoding='utf-8') as f:
             content = await f.read()
-        return f"File: {filePath}\n{content}{'=' * 80}\n"
+            if len(content) < 512:
+                return ""
+        return f"File: {filePath}\n{content}\n"
 
 
     async def async_os_walk(self, path):

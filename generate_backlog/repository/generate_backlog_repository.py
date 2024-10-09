@@ -17,3 +17,7 @@ class GenerateBacklogRepository(ABC):
     @abstractmethod
     def generateBacklogsText(self, docs):
         pass
+
+    @abstractmethod
+    def generateBacklogByOpenAI(self, textFromSourceCode):
+        pass
