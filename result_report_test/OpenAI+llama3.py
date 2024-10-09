@@ -14,15 +14,22 @@ client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 PROMPT = \
 '''당신은 유용한 AI 어시스턴트입니다. 사용자의 질의에 대해 한국어로 친절하고 정확하게 답변해야 합니다.
-You are a helpful AI assistant, you'll need to answer users' queries in a friendly and accurate manner.'''
+You are a useful AI assistant. You should answer your questions kindly and accurately in Korean.'''
 
 def create_backlog_with_openai(source_code):
     prompt = (
         "You are generating an Agile backlog from the following source code. "
         "Each backlog item should include a title, success criteria, domain separation, and task list."
         "Additionally, please make a list of the language and frameworks based on the source code."
-        "Lastly, if there is anything more to supplement among the code contents, please write it down.\n\n"
+        "Lastly, if there is anything more to supplement among the code contents, please write it down."
+        "If the most perfect code is 100 points, please decide what the source code above is and write it.\n\n"
         f"Source code:\n{source_code}\n"
+        
+        "Answer:"
+        "Languages: (Used programming languages in source code)"
+        "Frameworks: (Used frameworks in source code)"
+        "Supplements: (Supplements you judged)"
+        "Score of source code: (Source code score you judged)"
     )
 
     messages = [
@@ -54,7 +61,7 @@ def process_repository_for_backlog(repo_path):
                 with open(file_path, 'r', encoding='utf-8') as f:
                     file_text = f.read()
                     if len(file_text) >= 512:
-                        text += file_text + "\n"
+                        text += f"File:{file_path}\n{file_text}\n"
 
     if text:
         backlog = create_backlog_with_openai(text)
