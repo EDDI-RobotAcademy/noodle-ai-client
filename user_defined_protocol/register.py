@@ -4,6 +4,9 @@ import sys
 from generate_backlog.service.generate_backlog_service_impl import GenerateBacklogServiceImpl
 from generate_backlog.service.request.generate_backlog_request import GenerateBacklogRequest
 from generate_backlog.service.response.generate_backlog_response import GenerateBacklogResponse
+from multiple_user_test_point.service.multiple_user_test_point_service_impl import MultipleUserTestPointServiceImpl
+from multiple_user_test_point.service.request.user_test_point_request import UserTestPointRequest
+from multiple_user_test_point.service.response.user_test_point_response import UserTestPointResponse
 from openai_api_test.service.openai_api_test_service_impl import OpenAIAPIServiceImpl
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'template'))
@@ -104,6 +107,27 @@ class UserDefinedProtocolRegister:
             generateBacklogService.generateBacklogByOpenAI
         )
 
+    @staticmethod
+    def registerUserTestPointProtocol():
+        customProtocolService = CustomProtocolServiceImpl.getInstance()
+        multipleUserTestPointService = MultipleUserTestPointServiceImpl.getInstance()
+
+        requestClassMapInstance = RequestClassMap.getInstance()
+        requestClassMapInstance.addRequestClass(
+            UserDefinedProtocolNumber.USER_TEST_POINT,
+            UserTestPointRequest
+        )
+
+        responseClassMapInstance = ResponseClassMap.getInstance()
+        responseClassMapInstance.addResponseClass(
+            UserDefinedProtocolNumber.USER_TEST_POINT,
+            UserTestPointResponse
+        )
+
+        customProtocolService.registerCustomProtocol(
+            UserDefinedProtocolNumber.USER_TEST_POINT,
+            multipleUserTestPointService.operateUserTestPoint
+        )
 
     @staticmethod
     def registerUserDefinedProtocol():
@@ -111,3 +135,4 @@ class UserDefinedProtocolRegister:
         UserDefinedProtocolRegister.registerGenerateExampleBacklogProtocol()
         UserDefinedProtocolRegister.registerOpenAIAPITestProtocol()
         UserDefinedProtocolRegister.registerOpenAIBacklogProtocol()
+        UserDefinedProtocolRegister.registerUserTestPointProtocol()

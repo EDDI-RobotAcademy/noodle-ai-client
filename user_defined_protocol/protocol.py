@@ -9,6 +9,8 @@ class UserDefinedProtocolNumber(Enum):
 
     OPENAI_BACKLOG_PROTOCOL_NUMBER = 30 # 아예 큰 숫자로 부여해서 겹치지 않도록 함
 
+    USER_TEST_POINT = 12345
+
     @classmethod
     def hasValue(cls, value):
         return any(value == item.value for item in cls)
