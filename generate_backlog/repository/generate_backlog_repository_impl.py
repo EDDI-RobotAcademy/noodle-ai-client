@@ -1,6 +1,9 @@
 import asyncio
 import concurrent.futures
+import os
 
+import openai
+from dotenv import load_dotenv
 from langchain_community.document_loaders.generic import GenericLoader
 from langchain_community.document_loaders.parsers import LanguageParser
 from langchain_core.output_parsers import StrOutputParser
@@ -10,6 +13,7 @@ from langchain_text_splitters import Language
 
 from generate_backlog.repository.generate_backlog_repository import GenerateBacklogRepository
 
+load_dotenv()
 
 class GenerateBacklogRepositoryImpl(GenerateBacklogRepository):
     __instance = None
@@ -132,3 +136,36 @@ class GenerateBacklogRepositoryImpl(GenerateBacklogRepository):
             )
 
         return output
+
+    async def generateBacklogByOpenAI(self, textFromSourceCode):
+        client = openai.AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+        systemPrompt = \
+        '''당신은 유용한 AI 어시스턴트입니다. 사용자의 질의에 대해 한국어로 친절하고 정확하게 답변해야 합니다.
+        You are a helpful AI assistant, you'll need to answer users' queries in a friendly and accurate manner.'''
+
+        userPrompt = (
+            "You are generating an Agile backlog from the following source code. "
+            "Each backlog item should include a title, success criteria, domain separation, and task list."
+            "Additionally, please make a list of the language and frameworks based on the source code."
+            "Lastly, if there is anything more to supplement among the code contents, please write it down.\n\n"
+            f"Source code:\n{textFromSourceCode}\n"
+        )
+
+        messages = [
+            {
+                "role": "system", "content": systemPrompt,
+            },
+            {
+                "role": "user", "content": userPrompt
+            }
+        ]
+
+        response = await client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages,
+            temperature=0.2,
+            max_tokens=1500
+        )
+
+        return response.choices[0].message.content

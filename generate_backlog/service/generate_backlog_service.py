@@ -5,3 +5,7 @@ class GenerateBacklogService(ABC):
     @abstractmethod
     def generate(self, *args):
         pass
+
+    @abstractmethod
+    def generateBacklogByOpenAI(self, *args):
+        pass

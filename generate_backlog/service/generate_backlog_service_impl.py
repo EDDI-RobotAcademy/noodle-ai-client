@@ -1,4 +1,5 @@
 import asyncio
+import json
 
 from generate_backlog.repository.generate_backlog_repository_impl import GenerateBacklogRepositoryImpl
 from generate_backlog.service.generate_backlog_service import GenerateBacklogService
@@ -87,3 +88,23 @@ class GenerateBacklogServiceImpl(GenerateBacklogService):
                                 backlogInfo["todo"]])
 
         return {"message": backlogList}
+
+    async def generateBacklogByOpenAI(self, *args):
+        ColorPrinter.print_important_message(f"service -> arg: {args[0]}")
+
+        data = args[0].split()
+        userName = data[0]
+        githubRepositoryName = data[1]
+        githubBranchName = data[2]
+
+        await self.__githubProcessingRepository.cloneRepository(userName, githubRepositoryName)
+        githubRepositoryPath = f"./github_repositories/{githubRepositoryName}"
+        textFromSourceCode = await self.__textProcessingRepository.getTextFromSourceCode(githubRepositoryPath)
+
+        generatedBacklog = await self.__generateBacklogRepository.generateBacklogByOpenAI(textFromSourceCode)
+
+        backlogToJson = json.dumps({
+            "backlogList": generatedBacklog
+        })
+
+        return backlogToJson
