@@ -103,8 +103,10 @@ class GenerateBacklogServiceImpl(GenerateBacklogService):
 
         generatedBacklog = await self.__generateBacklogRepository.generateBacklogByOpenAI(textFromSourceCode)
 
+        backlogList = await self.__textProcessingRepository.postprocessingTextToBacklogs(generatedBacklog)
+
         backlogToJson = json.dumps({
-            "backlogList": generatedBacklog
+            "message": backlogList
         })
 
         return backlogToJson
