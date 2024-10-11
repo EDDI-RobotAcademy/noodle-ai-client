@@ -30,34 +30,20 @@ class TextProcessingRepositoryImpl(TextProcessingRepository):
         return cls.__instance
 
     async def postprocessingTextToBacklogs(self, generatedBacklogsText):
-        # 각 백로그 항목을 분리하여 반복 처리
-        backlogs = re.split(r'(?=\*\*백로그 제목:\*\*)', generatedBacklogsText)
+        pattern = r'#### \d+\. (.*?)\n- \*\*제목\*\*: (.*?)\n- \*\*성공 기준\*\*: (.*?)\n- \*\*도메인 분리\*\*: (.*?)\n- \*\*작업 목록\*\*:(.*?)(?=\n\n|$)'
 
-        # 첫 번째 백로그가 빈 값일 수 있으므로 필터링
-        backlogs = [backlog for backlog in backlogs if backlog.strip()]
+        backlogItems = re.findall(pattern, generatedBacklogsText, re.DOTALL)
 
-        # 각 항목에서 정보를 추출하여 리스트에 저장
         backlogList = []
-        for backlog in backlogs:
-            backlogTitle = re.search(r'\*\*백로그 제목:\*\*\s*(.*)', backlog)
-            if backlogTitle is None:
-                continue
-            domainName = re.search(r'\+ 도메인 이름:\s*`(.*)`', backlog)
-            successCriteria = re.search(r'\*\*Success Criteria:\*\*\s*(.*)', backlog)
-
-            # To-do 목록에서 "도메인"이나 "Success Criteria"로 시작하는 문장을 제외하고, 앞에 붙은 \t나 공백 제거
-            todoList = re.findall(r'^\s*\d+\.\s*(?!도메인|Success Criteria)(.*)', backlog, re.MULTILINE)
-
-            # 앞에 붙은 탭이나 공백 제거
-            todoList = [todo.strip() for todo in todoList]
-
-            backlog_data = {
-                '백로그 제목': backlogTitle.group(1) if backlogTitle else None,
-                '도메인 이름': domainName.group(1) if domainName else None,
-                'Success Criteria': successCriteria.group(1) if successCriteria else None,
-                'To-do 목록': todoList if todoList else None
+        for item in backlogItems:
+            backlog = {
+                '기능': item[0].strip(),
+                '제목': item[1].strip(),
+                '성공 기준': item[2].strip(),
+                '도메인 분리': item[3].strip(),
+                '작업 목록': [f"1. {task.strip()}" for task in re.findall(r'\d+\. (.*?)(?=\n\d+\.|\n\n|$)', item[4], re.DOTALL)]
             }
-            backlogList.append(backlog_data)
+            backlogList.append(backlog)
 
         return backlogList
 
@@ -91,3 +77,69 @@ class TextProcessingRepositoryImpl(TextProcessingRepository):
             text += result
 
         return text
+
+    async def extractSections(self, text: str):
+        ColorPrinter.print_important_message("1")
+        lines = text.split('\n')
+
+        sections = {}
+        currentTitle = None
+        currentContent = []
+        ColorPrinter.print_important_message("2")
+        for line in lines:
+            title_match = re.match(r'^#\s+([^#].+)$', line)
+
+            if title_match:
+                if currentTitle:
+                    sections[currentTitle] = '\n'.join(currentContent).strip()
+
+                currentTitle = title_match.group(1)
+                currentContent = []
+            else:
+                if currentTitle and line.strip():
+                    currentContent.append(line)
+        ColorPrinter.print_important_message("3")
+        if currentTitle:
+            sections[currentTitle] = '\n'.join(currentContent).strip()
+        ColorPrinter.print_important_message("4")
+        return sections
+
+    async def extractSubsections(self, text):
+        lines = await text.split('\n')
+
+        sections = {}
+        currentTitle = None
+        currentContent = []
+
+        for line in lines:
+            title_match = re.match(r'^##\s+(.+)$', line)
+
+            if title_match:
+                if currentTitle:
+                    sections[currentTitle] = '\n'.join(currentContent).strip()
+
+                currentTitle = await title_match.group(1)
+                currentContent = []
+            else:
+                if currentTitle:
+                    currentContent.append(line)
+
+        if currentTitle:
+            sections[currentTitle] = '\n'.join(currentContent).strip()
+
+        return sections
+
+    async def extractScore(self, score):
+        pattern = r'-\s*([^:]+):\s*(\d+)점'
+        match = re.search(pattern, score)
+
+        category = match.group(1).strip()
+        intScore = int(match.group(2))
+
+        details = []
+        for line in await score.split("\n"):
+            detailsMatch = re.match(r'\s*-\s*(.+)', line)
+            if detailsMatch and not await line.strip().endswith('점'):
+                details.append(detailsMatch.group(1).strip())
+
+        return category, intScore, details

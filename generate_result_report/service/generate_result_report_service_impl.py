@@ -63,3 +63,44 @@ class GenerateResultReportServiceImpl(GenerateResultReportService):
         ColorPrinter.print_important_message("After generate the report.")
         ColorPrinter.print_important_message(f"generatedResultReport: {generatedResultReport}")
 
+        ColorPrinter.print_important_message("Before extract sections.")
+        sections = await self.__textProcessingRepository.extractSections(generatedResultReport)
+        ColorPrinter.print_important_message("After extract sections.")
+
+        title = sections["프로젝트 제목"]
+        overview = sections["프로젝트 개요"]
+        skillset = sections["기술 스택"]
+        feature = sections["주요 기능"]
+        conjugations = sections["활용 방안"]
+        supplements = sections["보완할 점"]
+        score = sections["완성도"]
+
+        ColorPrinter.print_important_message("Before extract subsections.")
+        features = await self.__textProcessingRepository.extractSubsections(feature)
+        ColorPrinter.print_important_message("After extract subsections.")
+        featureList = []
+        for ff in features:
+            featureList.append([ff, features[ff]])
+
+        ColorPrinter.print_important_message("Before extract subsections.(score)")
+        scores = await self.__textProcessingRepository.extractSubsections(score)
+        ColorPrinter.print_important_message("After extract subsections.(score)")
+
+        ColorPrinter.print_important_message("Before extract scores.")
+        scoreList = []
+        for ss in scores:
+            s = await self.__textProcessingRepository.extractScore(ss)
+            scoreList.append([s[0], s[1][0]])
+        ColorPrinter.print_important_message("After extract scores.")
+
+        resultReportToJson = json.dumps({
+            "title": title,
+            "overview": overview,
+            "skillset": skillset,
+            "featureList": featureList,
+            "conjugations": conjugations,
+            "supplements": supplements,
+            "scoreList": scoreList
+        })
+
+        return resultReportToJson
