@@ -151,7 +151,7 @@ class UserDefinedProtocolRegister:
 
         customProtocolService.registerCustomProtocol(
             UserDefinedProtocolNumber.MASSIVE_PACKET_TEST_POINT,
-            massivePacketTestPointService.operateMassivePacketTestPoint()
+            massivePacketTestPointService.operateMassivePacketTestPoint
         )
 
     @staticmethod
