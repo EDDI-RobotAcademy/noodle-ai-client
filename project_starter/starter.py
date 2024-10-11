@@ -15,6 +15,7 @@ from template.os_detector.detect import OperatingSystemDetector
 from template.os_detector.operating_system import OperatingSystem
 from template.receiver.service.receiver_service_impl import ReceiverServiceImpl
 from template.thread_worker.service.thread_worker_service_impl import ThreadWorkerServiceImpl
+from template.thread_worker_pool.service.thread_worker_pool_service_impl import ThreadWorkerPoolServiceImpl
 from template.transmitter.service.transmitter_service_impl import TransmitterServiceImpl
 from template.utility.color_print import ColorPrinter
 from template.request_generator.request_class_map import RequestClassMap
@@ -51,15 +52,19 @@ if __name__ == "__main__":
     commandAnalyzerService = CommandAnalyzerServiceImpl.getInstance()
     commandExecutorService = CommandExecutorServiceImpl.getInstance()
 
-    threadWorkerService = ThreadWorkerServiceImpl.getInstance()
-    threadWorkerService.createThreadWorker("Receiver", receiverService.requestToReceiveCommand)
-    threadWorkerService.executeThreadWorker("Receiver")
+    threadWorkerPoolService = ThreadWorkerPoolServiceImpl.getInstance()
+    threadWorkerPoolService.createThreadWorkerPool("Receiver", 6)
+    threadWorkerPoolService.allocateExecuteFunction("Receiver", receiverService.requestToReceiveCommand)
+    receiverFutures = threadWorkerPoolService.executeThreadPoolWorker("Receiver")
 
-    threadWorkerService.createThreadWorker("CommandAnalyzer", commandAnalyzerService.analysisCommand)
-    threadWorkerService.executeThreadWorker("CommandAnalyzer")
+    threadWorkerPoolService.createThreadWorkerPool("CommandAnalyzer", 6)
+    threadWorkerPoolService.allocateExecuteFunction("CommandAnalyzer", commandAnalyzerService.analysisCommand)
+    threadWorkerPoolService.executeThreadPoolWorker("CommandAnalyzer")
 
-    threadWorkerService.createThreadWorker("CommandExecutor", commandExecutorService.executeCommand)
-    threadWorkerService.executeThreadWorker("CommandExecutor")
+    threadWorkerPoolService.createThreadWorkerPool("CommandExecutor", 5)
+    threadWorkerPoolService.allocateExecuteFunction("CommandExecutor", commandExecutorService.executeCommand)
+    threadWorkerPoolService.executeThreadPoolWorker("CommandExecutor")
 
-    threadWorkerService.createThreadWorker("Transmitter", transmitterService.requestToTransmitResult)
-    threadWorkerService.executeThreadWorker("Transmitter")
+    threadWorkerPoolService.createThreadWorkerPool("Transmitter", 1)
+    threadWorkerPoolService.allocateExecuteFunction("Transmitter", transmitterService.requestToTransmitResult)
+    threadWorkerPoolService.executeThreadPoolWorker("Transmitter")
