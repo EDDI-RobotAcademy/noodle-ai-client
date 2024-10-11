@@ -142,14 +142,24 @@ class GenerateBacklogRepositoryImpl(GenerateBacklogRepository):
 
         systemPrompt = \
         '''당신은 유용한 AI 어시스턴트입니다. 사용자의 질의에 대해 한국어로 친절하고 정확하게 답변해야 합니다.
-        You are a helpful AI assistant, you'll need to answer users' queries in a friendly and accurate manner.'''
+        You are a helpful AI assistant, You should answer your questions kindly and accurately in Korean.'''
 
         userPrompt = (
             "You are generating an Agile backlog from the following source code. "
             "Each backlog item should include a title, success criteria, domain separation, and task list."
             "Additionally, please make a list of the language and frameworks based on the source code."
-            "Lastly, if there is anything more to supplement among the code contents, please write it down.\n\n"
+            "Lastly, if there is anything more to supplement among the code contents, please write it down."
+            "If the most perfect code is 100 points, please decide what the source code below is and write it.\n\n"
             f"Source code:\n{textFromSourceCode}\n"
+
+            "Answer:"
+            "Languages: (Used programming languages in source code)"
+            "Frameworks: (Used frameworks in source code)"
+            "Supplements: (Supplements you judged)"
+            "Scores of source code: "
+            "   - Security Aspect: (Integer score you judged)"
+            "   - Code Structure and Maintainability Aspect: (Integer score you judged)"
+            "   - Overall score: (Integer score you judged)"
         )
 
         messages = [
@@ -164,7 +174,7 @@ class GenerateBacklogRepositoryImpl(GenerateBacklogRepository):
         response = await client.chat.completions.create(
             model="gpt-4o-mini",
             messages=messages,
-            temperature=0.2,
+            temperature=0.0,
             max_tokens=1500
         )
 

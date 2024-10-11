@@ -9,3 +9,15 @@ class TextProcessingRepository(ABC):
     @abstractmethod
     def getTextFromSourceCode(self, githubRepositoryPath):
         pass
+
+    @abstractmethod
+    def extractSections(self, text):
+        pass
+
+    @abstractmethod
+    def extractSubsections(self, text):
+        pass
+
+    @abstractmethod
+    def extractScore(self, score):
+        pass

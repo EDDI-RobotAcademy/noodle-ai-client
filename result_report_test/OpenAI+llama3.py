@@ -20,16 +20,21 @@ def create_backlog_with_openai(source_code):
     prompt = (
         "You are generating an Agile backlog from the following source code. "
         "Each backlog item should include a title, success criteria, domain separation, and task list."
+        "You have to write so that only one domain exists in one backlog."
         "Additionally, please make a list of the language and frameworks based on the source code."
         "Lastly, if there is anything more to supplement among the code contents, please write it down."
-        "If the most perfect code is 100 points, please decide what the source code above is and write it.\n\n"
+        "If the most perfect code is 100 points, please write down the score and the reason for the source code below in detail.\n\n"
+        "You should answer in Korean."
         f"Source code:\n{source_code}\n"
         
         "Answer:"
         "Languages: (Used programming languages in source code)"
         "Frameworks: (Used frameworks in source code)"
         "Supplements: (Supplements you judged)"
-        "Score of source code: (Source code score you judged)"
+        "Scores of source code: "
+        "   - Security Aspect: (Score you judged)"
+        "   - Code Structure and Maintainability Aspect: (Score you judged)"
+        "   - Overall score: (Score you judged)"
     )
 
     messages = [
@@ -44,7 +49,7 @@ def create_backlog_with_openai(source_code):
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=messages,
-        temperature=0.2,
+        temperature=0.0,
         max_tokens=1500
     )
 
@@ -74,45 +79,29 @@ backlogs = process_repository_for_backlog(repository_path)
 print(backlogs)
 
 
-def extract_backlog_items(backlogs) -> List[Dict[str, Any]]:
+def extract_backlog_items(backlogs):
     # 각 백로그 항목을 분리
-    backlog_sections = re.split(r'###\s+백로그\s+항목\s+\d+:', backlogs)[1:]
+    title_pattern = r"- \*\*제목\*\*: (.+)"
+    criteria_pattern = r"- \*\*성공 기준\*\*: (.+)"
+    domain_pattern = r"- \*\*도메인 분리\*\*: (.+)"
+    tasks_pattern = r"- \*\*작업 목록\*\*:(?:\n\s+\d+\.\s+.+)+"
 
-    backlog_items = []
-    for section in backlog_sections:
-        item = parse_backlog_section(section)
-        if item:
-            backlog_items.append(item)
+    # 각 백로그 항목에서 제목, 성공 기준, 도메인 분리, 작업 목록 추출 함수
+    titles = re.findall(title_pattern, backlogs)
+    success_criteria = re.findall(criteria_pattern, backlogs)
+    domains = re.findall(domain_pattern, backlogs)
 
-    return backlog_items
+    # 작업 목록 추출 및 개별 작업 항목으로 분리
+    raw_tasks = re.findall(tasks_pattern, backlogs)
+    tasks = [re.findall(r"\d+\.\s+(.+)", task_block) for task_block in raw_tasks]
 
-def parse_backlog_section(section: str) -> Dict[str, Any]:
-    # 제목 추출
-    title_match = re.search(r'-\s+\*\*제목\*\*:\s+(.+?)(?=\n|$)', section)
+    return titles, success_criteria, domains, tasks
 
-    # 성공 기준 추출
-    success_criteria_start = section.find('- **성공 기준**:')
-    success_criteria_end = section.find('- **도메인 분리**:')
-
-    if success_criteria_start == -1 or title_match is None:
-        return {'title': None, 'success_criteria': None}
-
-    if success_criteria_end == -1:
-        success_criteria_text = section[success_criteria_start:]
-    else:
-        success_criteria_text = section[success_criteria_start:success_criteria_end]
-
-    # 성공 기준 항목들을 리스트로 추출
-    success_criteria = re.findall(r'-\s+(.+?)(?=\n|$)',
-                                  success_criteria_text.split('- **성공 기준**:')[1].strip())
-
-    return {
-        'title': title_match.group(1).strip(),
-        'success_criteria': [criterion.strip() for criterion in success_criteria if criterion.strip()]
-    }
-
-extracted_items = extract_backlog_items(backlogs)
-print(extracted_items)
+titles, success_criteria, domains, tasks = extract_backlog_items(backlogs)
+print(titles)
+print(success_criteria)
+print(domains)
+print(tasks)
 
 # json_items = json.dumps({
 #     'backlog_items': extracted_items
@@ -132,7 +121,7 @@ generation_kwargs = {
             "max_tokens": 512,
             "stop": ["<|eot_id|>"],
             "top_p": 0.9,
-            "temperature": 0.2,
+            "temperature": 0.0,
             "echo": False,  # Echo the prompt in the output
             # "stream": True
         }
@@ -146,25 +135,20 @@ generation_kwargs = {
 template = f"""
 당신은 애자일 프로젝트 관리자이자 기술 문서 작성 전문가입니다. 아래 제공되는 프로젝트 백로그 정보를 바탕으로 상세한 프로젝트 결과 보고서를 작성해주세요.
 
-# 입력 정보
-**프로젝트 기본 정보**
-
-**프로젝트명**: [프로젝트 이름(전체 프로젝트 내용을 포괄하는 하나의 주제를 작성해주세요.)]
-
 **백로그 항목**
 {backlogs}
 # 요청 사항\n
 **다음 구조로 프로젝트 결과 보고서를 작성해주세요**:
 
-**프로젝트 개요**
+**프로젝트 제목**
+    - 빈 칸으로 남겨주세요.
 
-    - 목적 및 목표
-    - 주요 이해관계자
-    - 전반적인 접근 방식
+**프로젝트 개요**
+    - 빈 칸으로 남겨주세요.
     
-**개발 환경**
-    - 언어 및 프레임워크
-    
+**기술 스택**
+    - 빈 칸으로 남겨주세요.
+
 
 **주요 성과**
 
@@ -220,3 +204,36 @@ response_msg = llm(prompt, **generation_kwargs)
 
 response_text = response_msg['choices'][0]['text']
 print(response_text)
+
+def extract_sections(text):
+    # 텍스트를 줄 단위로 분할
+    lines = text.split('\n')
+
+    sections = {}
+    current_title = None
+    current_content = []
+
+    for line in lines:
+        # '#' 하나로 시작하는 메인 제목 찾기
+        title_match = re.match(r'^#\s+([^#].+)$', line)
+
+        if title_match:
+            # 새로운 제목을 찾았을 때, 이전 섹션 저장
+            if current_title:
+                sections[current_title] = '\n'.join(current_content).strip()
+
+            # 새로운 섹션 시작
+            current_title = title_match.group(1)
+            current_content = []
+        else:
+            # 제목이 아닌 경우 현재 섹션의 내용으로 추가
+            if current_title and line.strip():  # 빈 줄 제외
+                current_content.append(line)
+
+    # 마지막 섹션 저장
+    if current_title:
+        sections[current_title] = '\n'.join(current_content).strip()
+
+    return sections
+
+print(extract_sections(response_text))
