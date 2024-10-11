@@ -4,6 +4,9 @@ import sys
 from generate_backlog.service.generate_backlog_service_impl import GenerateBacklogServiceImpl
 from generate_backlog.service.request.generate_backlog_request import GenerateBacklogRequest
 from generate_backlog.service.response.generate_backlog_response import GenerateBacklogResponse
+from massive_packet_test_point.service.massive_packet_test_point_service_impl import MassivePacketTestPointServiceImpl
+from massive_packet_test_point.service.request.massive_packet_test_point_request import MassivePacketTestPointRequest
+from massive_packet_test_point.service.response.massive_packet_test_point_response import MassivePacketTestPointResponse
 from multiple_user_test_point.service.multiple_user_test_point_service_impl import MultipleUserTestPointServiceImpl
 from multiple_user_test_point.service.request.user_test_point_request import UserTestPointRequest
 from multiple_user_test_point.service.response.user_test_point_response import UserTestPointResponse
@@ -130,9 +133,32 @@ class UserDefinedProtocolRegister:
         )
 
     @staticmethod
+    def registerMassivePacketTestPointProtocol():
+        customProtocolService = CustomProtocolServiceImpl.getInstance()
+        massivePacketTestPointService = MassivePacketTestPointServiceImpl.getInstance()
+
+        requestClassMapInstance = RequestClassMap.getInstance()
+        requestClassMapInstance.addRequestClass(
+            UserDefinedProtocolNumber.MASSIVE_PACKET_TEST_POINT,
+            MassivePacketTestPointRequest
+        )
+
+        responseClassMapInstance = ResponseClassMap.getInstance()
+        responseClassMapInstance.addResponseClass(
+            UserDefinedProtocolNumber.MASSIVE_PACKET_TEST_POINT,
+            MassivePacketTestPointResponse
+        )
+
+        customProtocolService.registerCustomProtocol(
+            UserDefinedProtocolNumber.MASSIVE_PACKET_TEST_POINT,
+            massivePacketTestPointService.operateMassivePacketTestPoint()
+        )
+
+    @staticmethod
     def registerUserDefinedProtocol():
         UserDefinedProtocolRegister.registerGenerateBacklogProtocol()
         UserDefinedProtocolRegister.registerGenerateExampleBacklogProtocol()
         UserDefinedProtocolRegister.registerOpenAIAPITestProtocol()
         UserDefinedProtocolRegister.registerOpenAIBacklogProtocol()
         UserDefinedProtocolRegister.registerUserTestPointProtocol()
+        UserDefinedProtocolRegister.registerMassivePacketTestPointProtocol()

@@ -11,6 +11,7 @@ class UserDefinedProtocolNumber(Enum):
     GENERATE_RESULT_REPORT_PROTOCOL_NUMBER = 31
 
     USER_TEST_POINT = 12345
+    MASSIVE_PACKET_TEST_POINT = 32123
 
     @classmethod
     def hasValue(cls, value):
