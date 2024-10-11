@@ -30,13 +30,13 @@ class MassivePacketTestPointRepositoryImpl(MassivePacketTestPointRepository):
             ColorPrinter.print_important_data("Error: Data contains invalid characters", userToken)
             return
 
-        expected_length = 26 * 628
+        expected_length = 26 * 620
         if len(data) != expected_length:
             ColorPrinter.print_important_data(f"Error: Data length is {len(data)}, expected {expected_length}",
                                               userToken)
             return
 
-        for i in range(628):
+        for i in range(620):
             segment = data[i * 26:(i + 1) * 26]
             if segment != 'ABCDEFGHIJKLMNOPQRSTUVWXYZ':
                 ColorPrinter.print_important_data(f"Error: Segment {i + 1} is not valid: {segment}", userToken)
