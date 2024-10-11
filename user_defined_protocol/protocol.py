@@ -8,6 +8,7 @@ class UserDefinedProtocolNumber(Enum):
     OPENAI_API_TEXT_PROTOCOL_NUMBER = 8
 
     OPENAI_BACKLOG_PROTOCOL_NUMBER = 30 # 아예 큰 숫자로 부여해서 겹치지 않도록 함
+    GENERATE_RESULT_REPORT_PROTOCOL_NUMBER = 31
 
     @classmethod
     def hasValue(cls, value):
