@@ -66,41 +66,54 @@ class GenerateResultReportServiceImpl(GenerateResultReportService):
         ColorPrinter.print_important_message("Before extract sections.")
         sections = await self.__textProcessingRepository.extractSections(generatedResultReport)
         ColorPrinter.print_important_message("After extract sections.")
+        ColorPrinter.print_important_message(f"sections: {sections}")
 
-        title = sections["프로젝트 제목"]
-        overview = sections["프로젝트 개요"]
-        skillset = sections["기술 스택"]
-        feature = sections["주요 기능"]
-        conjugations = sections["활용 방안"]
-        supplements = sections["보완할 점"]
-        score = sections["완성도"]
+        title = sections["title"]
+        overview = sections["overview"]
+        tech_stack = sections["tech_stack"]
+        features = sections["features"]
+        usage = sections["usage"]
+        improvement = sections["improvement"]
+        completion = sections["completion"]
+        ColorPrinter.print_important_message(f"title: {title}")
+        ColorPrinter.print_important_message(f"overview: {overview}")
+        ColorPrinter.print_important_message(f"tech_stack: {tech_stack}")
+        ColorPrinter.print_important_message(f"features: {features}")
+        ColorPrinter.print_important_message(f"usage: {usage}")
+        ColorPrinter.print_important_message(f"improvement: {improvement}")
+        ColorPrinter.print_important_message(f"completion: {completion}")
 
         ColorPrinter.print_important_message("Before extract subsections.")
-        features = await self.__textProcessingRepository.extractSubsections(feature)
+        extractedFeatures = await self.__textProcessingRepository.extractFeatures(features)
         ColorPrinter.print_important_message("After extract subsections.")
-        featureList = []
-        for ff in features:
-            featureList.append([ff, features[ff]])
+        ColorPrinter.print_important_message(f"extractedFeatures: {extractedFeatures}")
 
         ColorPrinter.print_important_message("Before extract subsections.(score)")
-        scores = await self.__textProcessingRepository.extractSubsections(score)
+        extractedScore = await self.__textProcessingRepository.extractScore(completion)
         ColorPrinter.print_important_message("After extract subsections.(score)")
+        ColorPrinter.print_important_message(f"scores: {extractedScore}")
+        # 마지막 출력 체크
+        ColorPrinter.print_important_message(f"title: {title}")
+        ColorPrinter.print_important_message(f"overview: {overview}")
+        ColorPrinter.print_important_message(f"tech_stack: {tech_stack}")
+        ColorPrinter.print_important_message(f"extractedFeatures: {extractedFeatures}")
+        ColorPrinter.print_important_message(f"usage: {usage}")
+        ColorPrinter.print_important_message(f"improvement: {improvement}")
+        ColorPrinter.print_important_message(f"extractedScore: {extractedScore}")
 
-        ColorPrinter.print_important_message("Before extract scores.")
-        scoreList = []
-        for ss in scores:
-            s = await self.__textProcessingRepository.extractScore(ss)
-            scoreList.append([s[0], s[1][0]])
-        ColorPrinter.print_important_message("After extract scores.")
-
-        resultReportToJson = json.dumps({
+        ColorPrinter.print_important_message("Before dump to json.")
+        data = {
             "title": title,
             "overview": overview,
-            "skillset": skillset,
-            "featureList": featureList,
-            "conjugations": conjugations,
-            "supplements": supplements,
-            "scoreList": scoreList
-        })
+            "techStack": tech_stack,
+            "featureList": extractedFeatures,
+            "usage": usage,
+            "improvement": improvement,
+            "scoreList": extractedScore
+        }
+        ColorPrinter.print_important_message(f"data: {data}")
+        resultReportToJson = json.dump({"message": data})
+        ColorPrinter.print_important_message(f"resultReportToJson: {resultReportToJson}")
+        ColorPrinter.print_important_message("After dump to json.")
 
         return resultReportToJson
