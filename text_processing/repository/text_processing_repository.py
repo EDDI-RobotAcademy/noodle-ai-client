@@ -15,7 +15,7 @@ class TextProcessingRepository(ABC):
         pass
 
     @abstractmethod
-    def extractSubsections(self, text):
+    def extractFeatures(self, text):
         pass
 
     @abstractmethod

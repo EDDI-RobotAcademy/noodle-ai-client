@@ -1,12 +1,9 @@
 import asyncio
-import concurrent.futures
 import os
 import re
-from asyncio import as_completed
 from concurrent.futures.thread import ThreadPoolExecutor
 
 import aiofiles
-from PIL.ImageEnhance import Color
 
 from template.utility.color_print import ColorPrinter
 from text_processing.repository.text_processing_repository import TextProcessingRepository
@@ -79,67 +76,50 @@ class TextProcessingRepositoryImpl(TextProcessingRepository):
         return text
 
     async def extractSections(self, text: str):
-        ColorPrinter.print_important_message("1")
-        lines = text.split('\n')
+        pattern_map = {
+            'title': r'## 프로젝트 제목\n(.*?)\n',
+            'overview': r'## 프로젝트 개요\n(.*?)\n## 기술 스택',
+            'tech_stack': r'## #기술 스택\n(.*?)\n## 주요 기능',
+            'features': r'## 주요 기능\n(.*?)\n## 활용 방안',
+            'usage': r'## 활용 방안\n(.*?)\n## 보완할 점',
+            'improvement': r'## 보완할 점\n(.*?)\n## 완성도',
+            'completion': r'## 완성도\n(.*?)$'
+        }
 
+        # 추출 결과를 저장할 딕셔너리 생성
         sections = {}
-        currentTitle = None
-        currentContent = []
-        ColorPrinter.print_important_message("2")
-        for line in lines:
-            title_match = re.match(r'^#\s+([^#].+)$', line)
 
-            if title_match:
-                if currentTitle:
-                    sections[currentTitle] = '\n'.join(currentContent).strip()
-
-                currentTitle = title_match.group(1)
-                currentContent = []
+        for key, pattern in pattern_map.items():
+            result = re.search(pattern, text, re.DOTALL)
+            if result:
+                sections[key] = result.group(1).strip()
             else:
-                if currentTitle and line.strip():
-                    currentContent.append(line)
-        ColorPrinter.print_important_message("3")
-        if currentTitle:
-            sections[currentTitle] = '\n'.join(currentContent).strip()
-        ColorPrinter.print_important_message("4")
+                sections[key] = None
+
         return sections
 
-    async def extractSubsections(self, text):
-        lines = await text.split('\n')
+    async def extractFeatures(self, text):
+        pattern = r'### (.*?)\n(.*?)(?=\n\n|\Z)'
 
-        sections = {}
-        currentTitle = None
-        currentContent = []
+        matches = re.findall(pattern, text, re.DOTALL)
 
-        for line in lines:
-            title_match = re.match(r'^##\s+(.+)$', line)
+        extractedFeatures = []
 
-            if title_match:
-                if currentTitle:
-                    sections[currentTitle] = '\n'.join(currentContent).strip()
+        for match in matches:
+            title, content = match
+            combinedFeatures = f"{title.strip()}: \n{content.strip()}"
+            extractedFeatures.append(combinedFeatures)
 
-                currentTitle = await title_match.group(1)
-                currentContent = []
-            else:
-                if currentTitle:
-                    currentContent.append(line)
-
-        if currentTitle:
-            sections[currentTitle] = '\n'.join(currentContent).strip()
-
-        return sections
+        return extractedFeatures
 
     async def extractScore(self, score):
-        pattern = r'-\s*([^:]+):\s*(\d+)점'
-        match = re.search(pattern, score)
+        extractedScores = []  # 점수와 상세 정보를 담을 리스트
 
-        category = match.group(1).strip()
-        intScore = int(match.group(2))
+        # 모든 섹션을 한 번에 추출
+        pattern = r'### (?:보안|유지보수|전체):\n- \*\*점수\*\*: (\d+)점\n- \*\*상세 정보\*\*: (.*?)\n\n'
+        matches = re.findall(pattern, score + '\n\n', re.DOTALL)
 
-        details = []
-        for line in await score.split("\n"):
-            detailsMatch = re.match(r'\s*-\s*(.+)', line)
-            if detailsMatch and not await line.strip().endswith('점'):
-                details.append(detailsMatch.group(1).strip())
+        for match in matches:
+            extractedScores.append([int(match[0]), match[1].strip()])
 
-        return category, intScore, details
+        return extractedScores

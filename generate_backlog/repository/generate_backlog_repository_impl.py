@@ -175,7 +175,9 @@ class GenerateBacklogRepositoryImpl(GenerateBacklogRepository):
             model="gpt-4o-mini",
             messages=messages,
             temperature=0.0,
-            max_tokens=1500
+            max_tokens=1500,
+            top_p=0.01,
+            seed=1
         )
 
         return response.choices[0].message.content
