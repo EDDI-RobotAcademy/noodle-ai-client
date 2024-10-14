@@ -5,6 +5,8 @@ from generate_backlog.service.generate_backlog_service_impl import GenerateBackl
 from generate_backlog.service.request.generate_backlog_request import GenerateBacklogRequest
 from generate_backlog.service.response.generate_backlog_response import GenerateBacklogResponse
 from generate_result_report.service.generate_result_report_service_impl import GenerateResultReportServiceImpl
+from generate_result_report.service.request.generate_result_report_request import GenerateResultReportRequest
+from generate_result_report.service.response.generate_result_report_response import GenerateResultReportResponse
 from massive_packet_test_point.service.massive_packet_test_point_service_impl import MassivePacketTestPointServiceImpl
 from massive_packet_test_point.service.request.massive_packet_test_point_request import MassivePacketTestPointRequest
 from massive_packet_test_point.service.response.massive_packet_test_point_response import MassivePacketTestPointResponse
@@ -162,18 +164,18 @@ class UserDefinedProtocolRegister:
 
         requestClassMapInstance = RequestClassMap.getInstance()
         requestClassMapInstance.addRequestClass(
-            UserDefinedProtocolNumber.MASSIVE_PACKET_TEST_POINT,
-            GenerateBacklogRequest
+            UserDefinedProtocolNumber.GENERATE_RESULT_REPORT_PROTOCOL_NUMBER,
+            GenerateResultReportRequest
         )
 
         responseClassMapInstance = ResponseClassMap.getInstance()
         responseClassMapInstance.addResponseClass(
-            UserDefinedProtocolNumber.MASSIVE_PACKET_TEST_POINT,
-            GenerateBacklogResponse
+            UserDefinedProtocolNumber.GENERATE_RESULT_REPORT_PROTOCOL_NUMBER,
+            GenerateResultReportResponse
         )
 
         customProtocolService.registerCustomProtocol(
-            UserDefinedProtocolNumber.MASSIVE_PACKET_TEST_POINT,
+            UserDefinedProtocolNumber.GENERATE_RESULT_REPORT_PROTOCOL_NUMBER,
             generateResultReportService.generateResultReport
         )
 
