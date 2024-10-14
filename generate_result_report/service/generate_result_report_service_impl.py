@@ -83,6 +83,10 @@ class GenerateResultReportServiceImpl(GenerateResultReportService):
         ColorPrinter.print_important_message(f"improvement: {improvement}")
         ColorPrinter.print_important_message(f"completion: {completion}")
 
+        ColorPrinter.print_important_message("Before extract tech stack.")
+        extractedTechStack = await self.__textProcessingRepository.extractTechStack(tech_stack)
+        ColorPrinter.print_important_message("After extract tech stack.")
+
         ColorPrinter.print_important_message("Before extract subsections.")
         extractedFeatures = await self.__textProcessingRepository.extractFeatures(features)
         ColorPrinter.print_important_message("After extract subsections.")
@@ -95,25 +99,22 @@ class GenerateResultReportServiceImpl(GenerateResultReportService):
         # 마지막 출력 체크
         ColorPrinter.print_important_message(f"title: {title}")
         ColorPrinter.print_important_message(f"overview: {overview}")
-        ColorPrinter.print_important_message(f"tech_stack: {tech_stack}")
+        ColorPrinter.print_important_message(f"extractedTechStack: {extractedTechStack}")
         ColorPrinter.print_important_message(f"extractedFeatures: {extractedFeatures}")
         ColorPrinter.print_important_message(f"usage: {usage}")
         ColorPrinter.print_important_message(f"improvement: {improvement}")
         ColorPrinter.print_important_message(f"extractedScore: {extractedScore}")
 
-        ColorPrinter.print_important_message("Before dump to json.")
         data = {
             "title": title,
             "overview": overview,
-            "techStack": tech_stack,
+            "techStack": extractedTechStack,
             "featureList": extractedFeatures,
             "usage": usage,
             "improvement": improvement,
             "scoreList": extractedScore
         }
         ColorPrinter.print_important_message(f"data: {data}")
-        resultReportToJson = json.dump({"message": data})
-        ColorPrinter.print_important_message(f"resultReportToJson: {resultReportToJson}")
-        ColorPrinter.print_important_message("After dump to json.")
 
-        return resultReportToJson
+        dataToJson = json.dumps(data, indent=2)
+        return {"message": dataToJson}
