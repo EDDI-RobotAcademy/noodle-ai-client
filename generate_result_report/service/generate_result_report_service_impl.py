@@ -32,10 +32,14 @@ class GenerateResultReportServiceImpl(GenerateResultReportService):
     async def generateResultReport(self, *args):
         loop = asyncio.get_running_loop()
 
-        data = args[0].split()
-        userName = data[0]
-        githubRepositoryName = data[1]
-        githubBranchName = data[2]
+        # data = args[0].split()
+        # userName = data[0]
+        # githubRepositoryName = data[1]
+        # githubBranchName = data[2]
+
+        userName = args[0]
+        githubRepositoryName = args[1]
+        githubBranchName = args[2]
 
         ColorPrinter.print_important_message(f"service -> generate() userName: {userName}")
         ColorPrinter.print_important_message(f"service -> generate() githubRepositoryName: {githubRepositoryName}")
