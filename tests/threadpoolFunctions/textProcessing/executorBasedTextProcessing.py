@@ -75,7 +75,7 @@ class TestThreadWorkerPoolService:
     def executeThreadPoolWorker(self):
         self.commandAnalyzerRepository.sendDataToCommandExecutor(self.custom_request)
 
-        self.threadWorkerPoolService.shutdownThreadWorkerPool("CommandExecutor")
+        self.threadWorkerPoolService.shutdownPool("CommandExecutor")
 
         # results = [future.result() for future in self.futures]
         # expected_results = [f"Command executed by thread {i + 1}" for i in range(5)]

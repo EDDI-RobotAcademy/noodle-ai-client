@@ -62,7 +62,8 @@ class TextProcessingRepositoryImpl(TextProcessingRepository):
             return []
 
     async def getTextFromSourceCode(self, githubRepositoryPath):
-        githubRepositoryPath = '/home/eddi/dlls/noodle-ai-client/github_repositories/noodle-backend'
+        # githubRepositoryPath = '/home/eddi/dlls/noodle-ai-client/github_repositories/noodle-backend'
+        githubRepositoryPath = '/home/oem/proj/noodle/noodle-ai-client/github_repositories/noodle-backend'
         ColorPrinter.print_important_data("getTextFromSourceCode()", githubRepositoryPath)
         text = ""
 
