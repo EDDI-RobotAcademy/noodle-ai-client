@@ -46,7 +46,7 @@ class GenerateResultReportServiceImpl(GenerateResultReportService):
         ColorPrinter.print_important_message(f"service -> generate() githubBranchName: {githubBranchName}")
 
         ColorPrinter.print_important_message("Before clone the repository.")
-        await self.__githubProcessingRepository.cloneRepository(userName, githubRepositoryName)
+        # await self.__githubProcessingRepository.cloneRepository(userName, githubRepositoryName)
         githubRepositoryPath = f"./github_repositories/{githubRepositoryName}"
         ColorPrinter.print_important_message("After clone the repository.")
 

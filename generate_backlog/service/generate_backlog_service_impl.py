@@ -92,12 +92,16 @@ class GenerateBacklogServiceImpl(GenerateBacklogService):
     async def generateBacklogByOpenAI(self, *args):
         ColorPrinter.print_important_message(f"service -> arg: {args[0]}")
 
-        data = args[0].split()
-        userName = data[0]
-        githubRepositoryName = data[1]
-        githubBranchName = data[2]
+        # data = args[0].split()
+        userName = args[0]
+        githubRepositoryName = args[1]
+        githubBranchName = args[2]
 
-        await self.__githubProcessingRepository.cloneRepository(userName, githubRepositoryName)
+        ColorPrinter.print_important_data("arguments", userName)
+        ColorPrinter.print_important_data("githubRepositoryName", githubRepositoryName)
+        ColorPrinter.print_important_data("githubBranchName", githubBranchName)
+
+        # await self.__githubProcessingRepository.cloneRepository(userName, githubRepositoryName)
         githubRepositoryPath = f"./github_repositories/{githubRepositoryName}"
         textFromSourceCode = await self.__textProcessingRepository.getTextFromSourceCode(githubRepositoryPath)
 

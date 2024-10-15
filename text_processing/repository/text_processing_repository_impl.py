@@ -11,7 +11,7 @@ from text_processing.repository.text_processing_repository import TextProcessing
 
 class TextProcessingRepositoryImpl(TextProcessingRepository):
     __instance = None
-    executor = ThreadPoolExecutor()
+    # executor = ThreadPoolExecutor(max_workers=2)
 
     def __new__(cls):
         if cls.__instance is None:
@@ -51,16 +51,24 @@ class TextProcessingRepositoryImpl(TextProcessingRepository):
                 return ""
         return f"File: {filePath}\n{content}\n"
 
-
     async def async_os_walk(self, path):
-        loop = asyncio.get_running_loop()
-        return await loop.run_in_executor(self.executor, list, os.walk(path))
+        ColorPrinter.print_important_message("async_os_walk()")
+        try:
+            # Run the os.walk in a thread to avoid blocking the event loop
+            files = await asyncio.to_thread(lambda: list(os.walk(path)))
+            return files
+        except Exception as e:
+            ColorPrinter.print_important_message(f"Error during os.walk: {e}")
+            return []
 
     async def getTextFromSourceCode(self, githubRepositoryPath):
+        githubRepositoryPath = '/home/eddi/dlls/noodle-ai-client/github_repositories/noodle-backend'
+        ColorPrinter.print_important_data("getTextFromSourceCode()", githubRepositoryPath)
         text = ""
 
         tasks = []
         osPath = await self.async_os_walk(githubRepositoryPath)
+        ColorPrinter.print_important_data("getTextFromSourceCode() osPath", osPath)
         for root, dirs, files in osPath:
             for file in files:
                 name, ext = os.path.splitext(file)
