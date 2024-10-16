@@ -217,6 +217,8 @@ class GenerateResultReportRepositoryImpl(GenerateResultReportRepository):
         - 모델은 성공적으로 교통 표지판 분류를 수행하고, 실시간으로 교통 표지판을 인식하는 데, 적합한 기능을 구현하였음
         - 데이터 다양성 및 실시간 성능 최적화에 대한 개선이 필요하지만, 기본 기능은 만족할 만한 수준으로 구현되었음
         </example>
+        
+        **입력 값을 반환하기 전에 스스로 한번 더 검증하세요**
         """
 
         PROMPT = \
