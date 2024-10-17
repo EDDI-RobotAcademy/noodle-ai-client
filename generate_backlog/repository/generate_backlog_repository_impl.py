@@ -32,33 +32,48 @@ class GenerateBacklogRepositoryImpl(GenerateBacklogRepository):
         return cls.__instance
 
     async def createLoader(self, githubRepositoryPath):
-        loader = GenericLoader.from_filesystem(
-            githubRepositoryPath,
-            glob="**/*",
-            suffixes=[".py"],
-            exclude=["**/non-utf8-encoding.py", "**/__init__.py", "**/asgi.py", "**/settings.py", "**/wsgi.py",
-                     "**/migrations/*", "**/admin.py", "**/apps.py", "**/tests.py", "**/urls.py", "**/manage.py"],
-            parser=LanguageParser(language=Language.PYTHON, parser_threshold=100)
-        )
-
-        return loader
+        try:
+            loader = GenericLoader.from_filesystem(
+                githubRepositoryPath,
+                glob="**/*",
+                suffixes=[".py"],
+                exclude=["**/non-utf8-encoding.py", "**/__init__.py", "**/asgi.py", "**/settings.py", "**/wsgi.py",
+                         "**/migrations/*", "**/admin.py", "**/apps.py", "**/tests.py", "**/urls.py", "**/manage.py"],
+                parser=LanguageParser(language=Language.PYTHON, parser_threshold=100)
+            )
+            return loader
+        except Exception as e:
+            print(f"Error creating loader: {e}")
+            return None
 
     def loadDocument(self, loader):
-        return loader.load()
+        try:
+            return loader.load()
+        except Exception as e:
+            print(f"Error loading document: {e}")
+            return None
 
     def joinDocumentToDocs(self, document):
-        return "\n".join([document[i].page_content for i in range(len(document))])
+        try:
+            return "\n".join([document[i].page_content for i in range(len(document))])
+        except Exception as e:
+            print(f"Error joining document to docs: {e}")
+            return None
 
     def modelCall(self, model, prompt, docs):
-        chain = (
-            {"context": lambda x: docs}
-            | prompt
-            | model
-            | StrOutputParser()
-        )
+        try:
+            chain = (
+                {"context": lambda x: docs}
+                | prompt
+                | model
+                | StrOutputParser()
+            )
 
-        result = chain.invoke(input="")
-        return result
+            result = chain.invoke(input="")
+            return result
+        except Exception as e:
+            print(f"Error during model call: {e}")
+            return None
 
     async def generateBacklogsText(self, docs):
         template = """
@@ -104,80 +119,88 @@ class GenerateBacklogRepositoryImpl(GenerateBacklogRepository):
         Assistant:
         """
 
-        prompt = ChatPromptTemplate.from_messages(
-            [
-                (
-                    "system",
-                    "당신은 사용자를 도와서 애자일 프로세스 백로그를 작성해주는 어시스턴트입니다.",
-                ),
-                (
-                    "human",
-                    template
-                )
-            ]
-        )
-
-        llm = ChatOpenAI(
-            base_url="http://localhost:1234/v1",
-            api_key="lm_studio",
-            model="hugging-quants/Llama-3.2-3B-Instruct-Q4_K_M-GGUF",
-            temperature=0.05
-        )
-
-        loop = asyncio.get_running_loop()
-
-        with concurrent.futures.ThreadPoolExecutor() as pool:
-            output = await loop.run_in_executor(
-                pool,
-                self.modelCall,
-                llm,
-                prompt,
-                docs
+        try:
+            prompt = ChatPromptTemplate.from_messages(
+                [
+                    (
+                        "system",
+                        "당신은 사용자를 도와서 애자일 프로세스 백로그를 작성해주는 어시스턴트입니다.",
+                    ),
+                    (
+                        "human",
+                        template
+                    )
+                ]
             )
 
-        return output
+            llm = ChatOpenAI(
+                base_url="http://localhost:1234/v1",
+                api_key="lm_studio",
+                model="hugging-quants/Llama-3.2-3B-Instruct-Q4_K_M-GGUF",
+                temperature=0.05
+            )
+
+            loop = asyncio.get_running_loop()
+
+            with concurrent.futures.ThreadPoolExecutor() as pool:
+                output = await loop.run_in_executor(
+                    pool,
+                    self.modelCall,
+                    llm,
+                    prompt,
+                    docs
+                )
+
+            return output
+        except Exception as e:
+            print(f"Error generating backlogs text: {e}")
+            return None
 
     async def generateBacklogByOpenAI(self, textFromSourceCode):
-        client = openai.AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        try:
+            client = openai.AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-        systemPrompt = \
-        '''당신은 유용한 AI 어시스턴트입니다. 사용자의 질의에 대해 한국어로 친절하고 정확하게 답변해야 합니다.
-        You are a helpful AI assistant, You should answer your questions kindly and accurately in Korean.'''
+            systemPrompt = \
+            '''당신은 유용한 AI 어시스턴트입니다. 사용자의 질의에 대해 한국어로 친절하고 정확하게 답변해야 합니다.
+            You are a helpful AI assistant, You should answer your questions kindly and accurately in Korean.'''
 
-        userPrompt = (
-            "You are generating an Agile backlog from the following source code. "
-            "Each backlog item should include a title, success criteria, domain separation, and task list."
-            "Additionally, please make a list of the language and frameworks based on the source code."
-            "Lastly, if there is anything more to supplement among the code contents, please write it down."
-            "If the most perfect code is 100 points, please decide what the source code below is and write it.\n\n"
-            f"Source code:\n{textFromSourceCode}\n"
+            userPrompt = (
+                "You are generating an Agile backlog from the following source code. "
+                "Each backlog item should include a title, success criteria, domain separation, and task list."
+                "Additionally, please make a list of the language and frameworks based on the source code."
+                "Lastly, if there is anything more to supplement among the code contents, please write it down."
+                "If the most perfect code is 100 points, please decide what the source code below is and write it.\n\n"
+                f"Source code:\n{textFromSourceCode}\n"
 
-            "Answer:"
-            "Languages: (Used programming languages in source code)"
-            "Frameworks: (Used frameworks in source code)"
-            "Supplements: (Supplements you judged)"
-            "Scores of source code: "
-            "   - Security Aspect: (Integer score you judged)"
-            "   - Code Structure and Maintainability Aspect: (Integer score you judged)"
-            "   - Overall score: (Integer score you judged)"
-        )
+                "Answer:"
+                "Languages: (Used programming languages in source code)"
+                "Frameworks: (Used frameworks in source code)"
+                "Supplements: (Supplements you judged)"
+                "Scores of source code: "
+                "   - Security Aspect: (Integer score you judged)"
+                "   - Code Structure and Maintainability Aspect: (Integer score you judged)"
+                "   - Overall score: (Integer score you judged)"
+            )
 
-        messages = [
-            {
-                "role": "system", "content": systemPrompt,
-            },
-            {
-                "role": "user", "content": userPrompt
-            }
-        ]
+            messages = [
+                {
+                    "role": "system", "content": systemPrompt,
+                },
+                {
+                    "role": "user", "content": userPrompt
+                }
+            ]
 
-        response = await client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=messages,
-            temperature=0.0,
-            max_tokens=1500,
-            top_p=0.01,
-            seed=1
-        )
+            response = await client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=messages,
+                temperature=0.0,
+                max_tokens=1500,
+                top_p=0.01,
+                seed=1
+            )
 
-        return response.choices[0].message.content
+            return response.choices[0].message.content
+        except Exception as e:
+            print(f"Error during OpenAI API call: {e}")
+            return None
