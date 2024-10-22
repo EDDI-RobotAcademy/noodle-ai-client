@@ -12,6 +12,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'template'))
 from template.client_socket.service.client_socket_service_impl import ClientSocketServiceImpl
 from template.command_analyzer.service.command_analyzer_service_impl import CommandAnalyzerServiceImpl
 from template.command_executor.service.command_executor_service_impl import CommandExecutorServiceImpl
+from template.conditional_custom_executor.service.conditional_custom_executor_service_impl import ConditionalCustomExecutorServiceImpl
 from template.initializer.init_domain import DomainInitializer
 from template.os_detector.detect import OperatingSystemDetector
 from template.os_detector.operating_system import OperatingSystem
@@ -56,29 +57,35 @@ if __name__ == "__main__":
         commandAnalyzerService = CommandAnalyzerServiceImpl.getInstance()
         commandExecutorService = CommandExecutorServiceImpl.getInstance()
 
+        conditionalCustomExecutorService = ConditionalCustomExecutorServiceImpl.getInstance()
+
         threadWorkerPoolService = ThreadWorkerPoolServiceImpl.getInstance()
 
-        for receiverId in range(6):
+        for receiverId in range(4):
             threadWorkerPoolService.executeThreadPoolWorker(
                 f"Receiver-{receiverId}",
                 partial(receiverService.requestToReceiveCommand, receiverId)
             )
 
-            # Command Analyzer Thread Pool (6개)
-        for analyzerId in range(6):
+        for analyzerId in range(4):
             threadWorkerPoolService.executeThreadPoolWorker(
                 f"CommandAnalyzer-{analyzerId}",
                 partial(commandAnalyzerService.analysisCommand, analyzerId)
             )
 
-            # Command Executor Thread Pool (5개)
-        for executorId in range(5):
+        for executorId in range(4):
             threadWorkerPoolService.executeThreadPoolWorker(
                 f"CommandExecutor-{executorId}",
                 partial(commandExecutorService.executeCommand, executorId)
             )
 
-            # Transmitter Thread Pool (1개)
+        for conditionalCustomExecutorId in range(3):
+            threadWorkerPoolService.executeThreadPoolWorker(
+                f"ConditionalCustomExecutor-{conditionalCustomExecutorId}",
+                partial(conditionalCustomExecutorService.executeConditionalCustomCommand,
+                        conditionalCustomExecutorId)
+            )
+
         threadWorkerPoolService.executeThreadPoolWorker(
             "Transmitter-0",
             partial(transmitterService.requestToTransmitResult, 0)  # 단일 ID 사용
