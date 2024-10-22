@@ -27,18 +27,15 @@ class TextProcessingRepositoryImpl(TextProcessingRepository):
         return cls.__instance
 
     async def postprocessingTextToBacklogs(self, generatedBacklogsText):
-        pattern = r'#### \d+\. (.*?)\n- \*\*제목\*\*: (.*?)\n- \*\*성공 기준\*\*: (.*?)\n- \*\*도메인 분리\*\*: (.*?)\n- \*\*작업 목록\*\*:(.*?)(?=\n\n|$)'
-
+        pattern = r'\d+\. \*\*제목\*\*: (.*?)\n   - \*\*성공 기준\*\*: (.*?)\n   - \*\*도메인 분리\*\*: (.*?)\n   - \*\*작업 목록\*\*:(.*?)(?=\n\n|$)'
         backlogItems = re.findall(pattern, generatedBacklogsText, re.DOTALL)
-
         backlogList = []
         for item in backlogItems:
             backlog = {
-                '기능': item[0].strip(),
-                '제목': item[1].strip(),
-                '성공 기준': item[2].strip(),
-                '도메인 분리': item[3].strip(),
-                '작업 목록': [f"1. {task.strip()}" for task in re.findall(r'\d+\. (.*?)(?=\n\d+\.|\n\n|$)', item[4], re.DOTALL)]
+                'title': item[0].strip(),
+                'success_criteria': item[1].strip(),
+                'domain': item[2].strip(),
+                'task_list': [f"{task.strip()}" for task in item[3].split("\n") if task.strip()]
             }
             backlogList.append(backlog)
 

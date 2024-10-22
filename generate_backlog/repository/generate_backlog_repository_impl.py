@@ -157,50 +157,70 @@ class GenerateBacklogRepositoryImpl(GenerateBacklogRepository):
             return None
 
     async def generateBacklogByOpenAI(self, textFromSourceCode):
-        try:
-            client = openai.AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        client = openai.AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-            systemPrompt = \
-            '''당신은 유용한 AI 어시스턴트입니다. 사용자의 질의에 대해 한국어로 친절하고 정확하게 답변해야 합니다.
-            You are a helpful AI assistant, You should answer your questions kindly and accurately in Korean.'''
+        systemPrompt = \
+        '''당신은 유용한 AI 어시스턴트입니다. 사용자의 질의에 대해 한국어로 친절하고 정확하게 답변해야 합니다.
+        You are a helpful AI assistant, You should answer your questions kindly and accurately in Korean.'''
 
-            userPrompt = (
-                "You are generating an Agile backlog from the following source code. "
-                "Each backlog item should include a title, success criteria, domain separation, and task list."
-                "Additionally, please make a list of the language and frameworks based on the source code."
-                "Lastly, if there is anything more to supplement among the code contents, please write it down."
-                "If the most perfect code is 100 points, please decide what the source code below is and write it.\n\n"
-                f"Source code:\n{textFromSourceCode}\n"
+        userPrompt = (
+            "<head>REMAINDER: YOU HAVE TO ANSWER IN KOREAN!</head>"
+            "You are generating an Agile backlog from the following source code. "
+            "Each backlog item should include a title, success criteria, domain separation, and task list."
+            "Additionally, please make a list of the language and frameworks based on the source code."
+            "Lastly, if there is anything more to supplement among the code contents, please write it down."
+            "If the most perfect code is 100 points, please decide what the source code below is and write it.\n\n"
+            f"Source code:\n{textFromSourceCode}\n"
 
-                "Answer:"
-                "Languages: (Used programming languages in source code)"
-                "Frameworks: (Used frameworks in source code)"
-                "Supplements: (Supplements you judged)"
-                "Scores of source code: "
-                "   - Security Aspect: (Integer score you judged)"
-                "   - Code Structure and Maintainability Aspect: (Integer score you judged)"
-                "   - Overall score: (Integer score you judged)"
-            )
+            "Answer:"
+            "Languages: (Used programming languages in source code)"
+            "Frameworks: (Used frameworks in source code)"
+            "Agile Process Backlogs: (Backlogs you made)"
+            "Supplements: (Supplements you judged)"
+            "Scores of source code: "
+            "   - Security Aspect: (Integer score you judged)"
+            "   - Code Structure and Maintainability Aspect: (Integer score you judged)"
+            "   - Overall score: (Integer score you judged)"
+            
+            "**Input Example**"
+            "<example>"
+            "import sys"
+            "a = int(sys.stdin.readline())"
+            "b = int(sys.stdin.readline())"
+            "print(a + b)"
+            "</example>"
+            
+            "**Output Example**"
+            "<example>"
+            "Language: Python"
+            "Frameworks: sys"
+            "Agile Process Backlog"
+            "1. **Title**: Add two number"
+            "    - **Success Criteria**: Input the two numbers and print out a sum of the two numbers."
+            "    - **Domain Separation**: Calculation"
+            "    - **Task List**:"
+            "         - Input the two numbers"
+            "         - Calculate a sum of the two numbers"
+            "         - Print out the calculated sum"
+            "</example>"
+        )
 
-            messages = [
-                {
-                    "role": "system", "content": systemPrompt,
-                },
-                {
-                    "role": "user", "content": userPrompt
-                }
-            ]
+        messages = [
+            {
+                "role": "system", "content": systemPrompt,
+            },
+            {
+                "role": "user", "content": userPrompt
+            }
+        ]
 
-            response = await client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=messages,
-                temperature=0.0,
-                max_tokens=1500,
-                top_p=0.01,
-                seed=1
-            )
+        response = await client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages,
+            temperature=0.0,
+            max_tokens=1500,
+            top_p=0.01,
+            seed=1
+        )
 
-            return response.choices[0].message.content
-        except Exception as e:
-            print(f"Error during OpenAI API call: {e}")
-            return None
+        return response.choices[0].message.content
