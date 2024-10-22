@@ -145,6 +145,7 @@ class GenerateBacklogRepositoryImpl(GenerateBacklogRepository):
         You are a helpful AI assistant, You should answer your questions kindly and accurately in Korean.'''
 
         userPrompt = (
+            "<head>REMAINDER: YOU HAVE TO ANSWER IN KOREAN!</head>"
             "You are generating an Agile backlog from the following source code. "
             "Each backlog item should include a title, success criteria, domain separation, and task list."
             "Additionally, please make a list of the language and frameworks based on the source code."
@@ -155,11 +156,34 @@ class GenerateBacklogRepositoryImpl(GenerateBacklogRepository):
             "Answer:"
             "Languages: (Used programming languages in source code)"
             "Frameworks: (Used frameworks in source code)"
+            "Agile Process Backlogs: (Backlogs you made)"
             "Supplements: (Supplements you judged)"
             "Scores of source code: "
             "   - Security Aspect: (Integer score you judged)"
             "   - Code Structure and Maintainability Aspect: (Integer score you judged)"
             "   - Overall score: (Integer score you judged)"
+            
+            "**Input Example**"
+            "<example>"
+            "import sys"
+            "a = int(sys.stdin.readline())"
+            "b = int(sys.stdin.readline())"
+            "print(a + b)"
+            "</example>"
+            
+            "**Output Example**"
+            "<example>"
+            "Language: Python"
+            "Frameworks: sys"
+            "Agile Process Backlog"
+            "1. **Title**: Add two number"
+            "    - **Success Criteria**: Input the two numbers and print out a sum of the two numbers."
+            "    - **Domain Separation**: Calculation"
+            "    - **Task List**:"
+            "         - Input the two numbers"
+            "         - Calculate a sum of the two numbers"
+            "         - Print out the calculated sum"
+            "</example>"
         )
 
         messages = [
