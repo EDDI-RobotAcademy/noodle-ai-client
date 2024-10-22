@@ -26,8 +26,18 @@ class ConditionalCustomExecutorTestPointRepositoryImpl(ConditionalCustomExecutor
         userToken = args[1]
         ColorPrinter.print_important_message(f"Start Conditional Custom Executor operate() -> userToken: {userToken}")
 
-        for i in range(7):
-            ipcExecutorConditionalCustomExecutorChannel.put({ "intermediateData": i })
+        intermediate_data_list = [{"intermediateData": i} for i in range(7)]
+
+        ipcExecutorConditionalCustomExecutorChannel.put(
+            (
+                12322,
+                {
+                    "userToken": "test",
+                    "intermediateData": intermediate_data_list,
+                    "tag": "conditional-custom-executor"
+                }
+            )
+        )
 
         ColorPrinter.print_important_message("Finish Conditional Custom Executor operate()")
 

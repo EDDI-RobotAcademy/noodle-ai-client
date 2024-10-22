@@ -5,6 +5,8 @@ from conditional_custom_executor_test_point.service.conditional_custom_executor_
     ConditionalCustomExecutorTestPointServiceImpl
 from conditional_custom_executor_test_point.service.request.conditional_custom_executor_test_point_request import \
     ConditionalCustomExecutorTestPointRequest
+from conditional_custom_executor_test_point.service.response.conditional_custom_executor_intermediate_info_response import \
+    ConditionalCustomExecutorIntermediateInfoResponse
 from conditional_custom_executor_test_point.service.response.conditional_custom_executor_test_point_response import \
     ConditionalCustomExecutorTestPointResponse
 from generate_backlog.service.generate_backlog_service_impl import GenerateBacklogServiceImpl
@@ -208,6 +210,14 @@ class UserDefinedProtocolRegister:
         )
 
     @staticmethod
+    def registerConditionalCustomExecutorIntermediateInfoProtocol():
+        responseClassMapInstance = ResponseClassMap.getInstance()
+        responseClassMapInstance.addResponseClass(
+            UserDefinedProtocolNumber.CONDITIONAL_CUSTOM_EXECUTOR_INTERMEDIATE_INFO,
+            ConditionalCustomExecutorIntermediateInfoResponse
+        )
+
+    @staticmethod
     def registerUserDefinedProtocol():
         UserDefinedProtocolRegister.registerGenerateBacklogProtocol()
         UserDefinedProtocolRegister.registerGenerateExampleBacklogProtocol()
@@ -217,5 +227,6 @@ class UserDefinedProtocolRegister:
         UserDefinedProtocolRegister.registerUserTestPointProtocol()
         UserDefinedProtocolRegister.registerMassivePacketTestPointProtocol()
         UserDefinedProtocolRegister.registerConditionalCustomExecutorTestPointProtocol()
+        UserDefinedProtocolRegister.registerConditionalCustomExecutorIntermediateInfoProtocol()
 
         UserDefinedProtocolRegister.registerGenerateResultReportProtocol()
