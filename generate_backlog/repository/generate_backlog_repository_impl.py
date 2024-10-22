@@ -32,33 +32,48 @@ class GenerateBacklogRepositoryImpl(GenerateBacklogRepository):
         return cls.__instance
 
     async def createLoader(self, githubRepositoryPath):
-        loader = GenericLoader.from_filesystem(
-            githubRepositoryPath,
-            glob="**/*",
-            suffixes=[".py"],
-            exclude=["**/non-utf8-encoding.py", "**/__init__.py", "**/asgi.py", "**/settings.py", "**/wsgi.py",
-                     "**/migrations/*", "**/admin.py", "**/apps.py", "**/tests.py", "**/urls.py", "**/manage.py"],
-            parser=LanguageParser(language=Language.PYTHON, parser_threshold=100)
-        )
-
-        return loader
+        try:
+            loader = GenericLoader.from_filesystem(
+                githubRepositoryPath,
+                glob="**/*",
+                suffixes=[".py"],
+                exclude=["**/non-utf8-encoding.py", "**/__init__.py", "**/asgi.py", "**/settings.py", "**/wsgi.py",
+                         "**/migrations/*", "**/admin.py", "**/apps.py", "**/tests.py", "**/urls.py", "**/manage.py"],
+                parser=LanguageParser(language=Language.PYTHON, parser_threshold=100)
+            )
+            return loader
+        except Exception as e:
+            print(f"Error creating loader: {e}")
+            return None
 
     def loadDocument(self, loader):
-        return loader.load()
+        try:
+            return loader.load()
+        except Exception as e:
+            print(f"Error loading document: {e}")
+            return None
 
     def joinDocumentToDocs(self, document):
-        return "\n".join([document[i].page_content for i in range(len(document))])
+        try:
+            return "\n".join([document[i].page_content for i in range(len(document))])
+        except Exception as e:
+            print(f"Error joining document to docs: {e}")
+            return None
 
     def modelCall(self, model, prompt, docs):
-        chain = (
-            {"context": lambda x: docs}
-            | prompt
-            | model
-            | StrOutputParser()
-        )
+        try:
+            chain = (
+                {"context": lambda x: docs}
+                | prompt
+                | model
+                | StrOutputParser()
+            )
 
-        result = chain.invoke(input="")
-        return result
+            result = chain.invoke(input="")
+            return result
+        except Exception as e:
+            print(f"Error during model call: {e}")
+            return None
 
     async def generateBacklogsText(self, docs):
         template = """
@@ -104,38 +119,42 @@ class GenerateBacklogRepositoryImpl(GenerateBacklogRepository):
         Assistant:
         """
 
-        prompt = ChatPromptTemplate.from_messages(
-            [
-                (
-                    "system",
-                    "당신은 사용자를 도와서 애자일 프로세스 백로그를 작성해주는 어시스턴트입니다.",
-                ),
-                (
-                    "human",
-                    template
-                )
-            ]
-        )
-
-        llm = ChatOpenAI(
-            base_url="http://localhost:1234/v1",
-            api_key="lm_studio",
-            model="hugging-quants/Llama-3.2-3B-Instruct-Q4_K_M-GGUF",
-            temperature=0.05
-        )
-
-        loop = asyncio.get_running_loop()
-
-        with concurrent.futures.ThreadPoolExecutor() as pool:
-            output = await loop.run_in_executor(
-                pool,
-                self.modelCall,
-                llm,
-                prompt,
-                docs
+        try:
+            prompt = ChatPromptTemplate.from_messages(
+                [
+                    (
+                        "system",
+                        "당신은 사용자를 도와서 애자일 프로세스 백로그를 작성해주는 어시스턴트입니다.",
+                    ),
+                    (
+                        "human",
+                        template
+                    )
+                ]
             )
 
-        return output
+            llm = ChatOpenAI(
+                base_url="http://localhost:1234/v1",
+                api_key="lm_studio",
+                model="hugging-quants/Llama-3.2-3B-Instruct-Q4_K_M-GGUF",
+                temperature=0.05
+            )
+
+            loop = asyncio.get_running_loop()
+
+            with concurrent.futures.ThreadPoolExecutor() as pool:
+                output = await loop.run_in_executor(
+                    pool,
+                    self.modelCall,
+                    llm,
+                    prompt,
+                    docs
+                )
+
+            return output
+        except Exception as e:
+            print(f"Error generating backlogs text: {e}")
+            return None
 
     async def generateBacklogByOpenAI(self, textFromSourceCode):
         client = openai.AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
