@@ -12,6 +12,7 @@ class UserDefinedProtocolNumber(Enum):
 
     USER_TEST_POINT = 12345
     MASSIVE_PACKET_TEST_POINT = 32123
+    CONDITIONAL_CUSTOM_EXECUTOR_TEST_POINT = 12321
 
     @classmethod
     def hasValue(cls, value):

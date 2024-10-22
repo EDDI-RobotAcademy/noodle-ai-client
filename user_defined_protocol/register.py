@@ -1,6 +1,12 @@
 import os
 import sys
 
+from conditional_custom_executor_test_point.service.conditional_custom_executor_test_point_service_impl import \
+    ConditionalCustomExecutorTestPointServiceImpl
+from conditional_custom_executor_test_point.service.request.conditional_custom_executor_test_point_request import \
+    ConditionalCustomExecutorTestPointRequest
+from conditional_custom_executor_test_point.service.response.conditional_custom_executor_test_point_response import \
+    ConditionalCustomExecutorTestPointResponse
 from generate_backlog.service.generate_backlog_service_impl import GenerateBacklogServiceImpl
 from generate_backlog.service.request.generate_backlog_request import GenerateBacklogRequest
 from generate_backlog.service.response.generate_backlog_response import GenerateBacklogResponse
@@ -180,11 +186,36 @@ class UserDefinedProtocolRegister:
         )
 
     @staticmethod
+    def registerConditionalCustomExecutorTestPointProtocol():
+        customProtocolService = CustomProtocolServiceImpl.getInstance()
+        conditionalCustomExecutorTestPointService = ConditionalCustomExecutorTestPointServiceImpl.getInstance()
+
+        requestClassMapInstance = RequestClassMap.getInstance()
+        requestClassMapInstance.addRequestClass(
+            UserDefinedProtocolNumber.CONDITIONAL_CUSTOM_EXECUTOR_TEST_POINT,
+            ConditionalCustomExecutorTestPointRequest
+        )
+
+        responseClassMapInstance = ResponseClassMap.getInstance()
+        responseClassMapInstance.addResponseClass(
+            UserDefinedProtocolNumber.CONDITIONAL_CUSTOM_EXECUTOR_TEST_POINT,
+            ConditionalCustomExecutorTestPointResponse
+        )
+
+        customProtocolService.registerCustomProtocol(
+            UserDefinedProtocolNumber.CONDITIONAL_CUSTOM_EXECUTOR_TEST_POINT,
+            conditionalCustomExecutorTestPointService.operateConditionalCustomExecutorTestPoint
+        )
+
+    @staticmethod
     def registerUserDefinedProtocol():
         UserDefinedProtocolRegister.registerGenerateBacklogProtocol()
         UserDefinedProtocolRegister.registerGenerateExampleBacklogProtocol()
         UserDefinedProtocolRegister.registerOpenAIAPITestProtocol()
         UserDefinedProtocolRegister.registerOpenAIBacklogProtocol()
+
         UserDefinedProtocolRegister.registerUserTestPointProtocol()
         UserDefinedProtocolRegister.registerMassivePacketTestPointProtocol()
+        UserDefinedProtocolRegister.registerConditionalCustomExecutorTestPointProtocol()
+
         UserDefinedProtocolRegister.registerGenerateResultReportProtocol()

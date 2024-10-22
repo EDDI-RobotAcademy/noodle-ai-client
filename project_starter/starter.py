@@ -12,6 +12,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'template'))
 from template.client_socket.service.client_socket_service_impl import ClientSocketServiceImpl
 from template.command_analyzer.service.command_analyzer_service_impl import CommandAnalyzerServiceImpl
 from template.command_executor.service.command_executor_service_impl import CommandExecutorServiceImpl
+from template.conditional_custom_executor.service.conditional_custom_executor_service_impl import ConditionalCustomExecutorServiceImpl
 from template.initializer.init_domain import DomainInitializer
 from template.os_detector.detect import OperatingSystemDetector
 from template.os_detector.operating_system import OperatingSystem
@@ -56,6 +57,8 @@ if __name__ == "__main__":
         commandAnalyzerService = CommandAnalyzerServiceImpl.getInstance()
         commandExecutorService = CommandExecutorServiceImpl.getInstance()
 
+        conditionalCustomExecutorService = ConditionalCustomExecutorServiceImpl.getInstance()
+
         threadWorkerPoolService = ThreadWorkerPoolServiceImpl.getInstance()
 
         for receiverId in range(6):
@@ -76,6 +79,13 @@ if __name__ == "__main__":
             threadWorkerPoolService.executeThreadPoolWorker(
                 f"CommandExecutor-{executorId}",
                 partial(commandExecutorService.executeCommand, executorId)
+            )
+
+        for conditionalCustomExecutorId in range(5):
+            threadWorkerPoolService.executeThreadPoolWorker(
+                f"ConditionalCustomExecutor-{conditionalCustomExecutorId}",
+                partial(conditionalCustomExecutorService.executeConditionalCustomCommand,
+                        conditionalCustomExecutorId)
             )
 
             # Transmitter Thread Pool (1개)

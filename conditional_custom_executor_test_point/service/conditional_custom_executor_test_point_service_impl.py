@@ -1,10 +1,11 @@
 from conditional_custom_executor_test_point.repository.conditional_custom_executor_test_point_repository_impl import \
     ConditionalCustomExecutorTestPointRepositoryImpl
-from multiple_user_test_point.service.multiple_user_test_point_service import MultipleUserTestPointService
+from conditional_custom_executor_test_point.service.conditional_custom_executor_test_point_service import \
+    ConditionalCustomExecutorTestPointService
 from template.utility.color_print import ColorPrinter
 
 
-class ConditionalCustomExecutorTestPointServiceImpl(MultipleUserTestPointService):
+class ConditionalCustomExecutorTestPointServiceImpl(ConditionalCustomExecutorTestPointService):
     __instance = None
 
     def __new__(cls):
@@ -21,11 +22,13 @@ class ConditionalCustomExecutorTestPointServiceImpl(MultipleUserTestPointService
 
         return cls.__instance
 
-    async def operateConditionalCustomExecutorTestPoint(self, *args, **kwargs):
+    async def operateConditionalCustomExecutorTestPoint(self, *args, ipcExecutorConditionalCustomExecutorChannel=None, **kwargs):
         ColorPrinter.print_important_data("operateConditionalCustomExecutorTestPoint", args)
 
-        userToken = await self.__conditionalCustomExecutorTestPointRepository.operate(*args, **kwargs)
+        userToken = await self.__conditionalCustomExecutorTestPointRepository.operate(*args,
+                                                                                      ipcExecutorConditionalCustomExecutorChannel,
+                                                                                      **kwargs)
 
         return {
-            "userToken": userToken
+            "userToken": "test"
         }

@@ -21,14 +21,14 @@ class ConditionalCustomExecutorTestPointRepositoryImpl(ConditionalCustomExecutor
 
         return cls.__instance
 
-    async def operate(self, *args, **kwargs):
-        userToken = args[0]
-
-        ColorPrinter.print_important_data("Start with userToken", userToken)
+    async def operate(self, *args, ipcExecutorConditionalCustomExecutorChannel=None, **kwargs):
+        ipcExecutorConditionalCustomExecutorChannel = args[0]
+        userToken = args[1]
+        ColorPrinter.print_important_message(f"Start Conditional Custom Executor operate() -> userToken: {userToken}")
 
         for i in range(7):
+            ipcExecutorConditionalCustomExecutorChannel.put({ "intermediateData": i })
 
-
-        ColorPrinter.print_important_data("Finish with userToken", userToken)
+        ColorPrinter.print_important_message("Finish Conditional Custom Executor operate()")
 
         return userToken
