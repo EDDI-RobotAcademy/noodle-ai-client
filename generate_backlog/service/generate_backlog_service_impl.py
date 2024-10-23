@@ -69,7 +69,8 @@ class GenerateBacklogServiceImpl(GenerateBacklogService):
         backlogList = []
 
         for backlogInfo in parsedBacklogText:
-            backlogList.append([backlogInfo["backlogName"],backlogInfo["domainName"], backlogInfo["successCriteria"], backlogInfo["todo"]])
+            backlogList.append([backlogInfo["backlogName"], backlogInfo["domainName"], backlogInfo["successCriteria"],
+                                backlogInfo["todo"]])
         ColorPrinter.print_important_message(f"backlogList: {backlogList}")
         return {"message": backlogList}
 
@@ -77,7 +78,8 @@ class GenerateBacklogServiceImpl(GenerateBacklogService):
         print(f"service -> example()")
 
         text = ""
-        with open("/Users/j213h/Jh/SK-Networks-AI-Camp/Projects/Noodle/noodle-ai-client/code_analysis/gpt.txt", "r") as f:
+        with open("/Users/j213h/Jh/SK-Networks-AI-Camp/Projects/Noodle/noodle-ai-client/code_analysis/gpt.txt",
+                  "r") as f:
             text += f.read()
 
         parsedBacklogText = self.__textProcessingRepository.postprocessingTextToBacklogs(text)
@@ -108,9 +110,10 @@ class GenerateBacklogServiceImpl(GenerateBacklogService):
         generatedBacklog = await self.__generateBacklogRepository.generateBacklogByOpenAI(textFromSourceCode)
 
         backlogList = await self.__textProcessingRepository.postprocessingTextToBacklogs(generatedBacklog)
-
-        backlogToJson = json.dumps({
-            "message": backlogList
-        })
+        # print(backlogList)
+        # backlogToJson = json.dumps({
+        #     "message": backlogList
+        # })
+        backlogToJson = {"message": backlogList}
 
         return backlogToJson
