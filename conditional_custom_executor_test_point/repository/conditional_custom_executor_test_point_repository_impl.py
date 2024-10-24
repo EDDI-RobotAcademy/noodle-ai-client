@@ -22,23 +22,29 @@ class ConditionalCustomExecutorTestPointRepositoryImpl(ConditionalCustomExecutor
         return cls.__instance
 
     async def operate(self, *args, ipcExecutorConditionalCustomExecutorChannel=None, **kwargs):
+        ColorPrinter.print_important_message(f"operate() -> args: {args}, kwargs: {kwargs}")
         ipcExecutorConditionalCustomExecutorChannel = args[0]
         userToken = args[1]
+        intermediate_data_list = kwargs['intermediateData']
+
         ColorPrinter.print_important_message(f"Start Conditional Custom Executor operate() -> userToken: {userToken}")
+        ColorPrinter.print_important_message(f"Start Conditional Custom Executor operate() -> intermediate_data_list: {intermediate_data_list}")
 
-        intermediate_data_list = [{"intermediateData": i} for i in range(7)]
-
-        ipcExecutorConditionalCustomExecutorChannel.put(
-            (
-                12322,
-                {
-                    "userToken": "test",
-                    "intermediateData": intermediate_data_list,
-                    "tag": "conditional-custom-executor"
-                }
+        try:
+            ipcExecutorConditionalCustomExecutorChannel.put(
+                (
+                    30,
+                    {
+                        "userToken": "test",
+                        "intermediateData": intermediate_data_list,
+                        "tag": "conditional-custom-executor"
+                    }
+                )
             )
-        )
 
-        ColorPrinter.print_important_message("Finish Conditional Custom Executor operate()")
+            ColorPrinter.print_important_message("Finish Conditional Custom Executor operate()")
+
+        except Exception as e:
+            ColorPrinter.print_important_message(f"Error occur while sending data to Django: {e}!")
 
         return userToken

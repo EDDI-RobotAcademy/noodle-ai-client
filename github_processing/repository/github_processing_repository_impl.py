@@ -5,6 +5,7 @@ import shutil
 from git import Repo
 
 from github_processing.repository.github_processing_repository import GithubProcessingRepository
+from template.utility.color_print import ColorPrinter
 
 
 class GithubProcessingRepositoryImpl(GithubProcessingRepository):
@@ -24,11 +25,18 @@ class GithubProcessingRepositoryImpl(GithubProcessingRepository):
 
         return cls.__instance
 
-    async def cloneRepository(self, userName, githubRepositoryName):
+    async def cloneRepository(self, userName, githubRepositoryName, githubBranchName):
+        ColorPrinter.print_important_message(f"github_processing_repository_impl -> cloneRepository()")
         GITHUB_REPOSITORY_URL = f"{self.GITHUB_URL}/{userName}/{githubRepositoryName}"
-        repositoryPath = f"./github_repositories/{githubRepositoryName}"
+        ColorPrinter.print_important_message(f"GITHUB_REPOSITORY_URL: {GITHUB_REPOSITORY_URL}")
 
-        Repo.clone_from(GITHUB_REPOSITORY_URL, to_path=repositoryPath)
+        repositoryPath = f"./github_repositories/{githubRepositoryName}"
+        ColorPrinter.print_important_message(f"repositoryPath: {repositoryPath}")
+
+        try:
+            Repo.clone_from(GITHUB_REPOSITORY_URL, to_path=repositoryPath, branch=githubBranchName)
+        except Exception as e:
+            ColorPrinter.print_important_message(f"Error while cloning Repository: {e}!")
 
     async def deleteRepository(self, githubRepositoryPath):
         shutil.rmtree(githubRepositoryPath)
