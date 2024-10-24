@@ -1,6 +1,10 @@
 import asyncio
 import json
 
+from conditional_custom_executor_test_point.repository.conditional_custom_executor_test_point_repository_impl import \
+    ConditionalCustomExecutorTestPointRepositoryImpl
+from conditional_custom_executor_test_point.service.conditional_custom_executor_test_point_service_impl import \
+    ConditionalCustomExecutorTestPointServiceImpl
 from generate_backlog.repository.generate_backlog_repository_impl import GenerateBacklogRepositoryImpl
 from generate_result_report.repository.generate_result_report_repository_impl import GenerateResultReportRepositoryImpl
 from generate_result_report.service.generate_result_report_service import GenerateResultReportService
@@ -19,6 +23,8 @@ class GenerateResultReportServiceImpl(GenerateResultReportService):
             cls.__instance.__githubProcessingRepository = GithubProcessingRepositoryImpl.getInstance()
             cls.__instance.__generateBacklogRepository = GenerateBacklogRepositoryImpl.getInstance()
             cls.__instance.__textProcessingRepository = TextProcessingRepositoryImpl.getInstance()
+            # cls.__instance.__conditionalCustomExecutorRepository = ConditionalCustomExecutorTestPointRepositoryImpl.getInstance()
+            cls.__instance.__conditionalCustomExecutorService = ConditionalCustomExecutorTestPointServiceImpl.getInstance()
 
         return cls.__instance
 
@@ -29,30 +35,34 @@ class GenerateResultReportServiceImpl(GenerateResultReportService):
 
         return cls.__instance
 
-    async def generateResultReport(self, *args):
+    async def generateResultReport(self, *args, ipcExecutorConditionalCustomExecutorChannel):
         loop = asyncio.get_running_loop()
 
-        # data = args[0].split()
-        # userName = data[0]
-        # githubRepositoryName = data[1]
-        # githubBranchName = data[2]
+        data = args[0][1:-1].split(", ")
+        userName = data[0][1:-1]
+        githubRepositoryName = data[1][1:-1]
+        githubBranchName = data[2][1:-1]
+        ColorPrinter.print_important_message(f"service -> generate() data: {data}")
 
-        userName = args[0]
-        githubRepositoryName = args[1]
-        githubBranchName = args[2]
-
-        ColorPrinter.print_important_message(f"service -> generate() userName: {userName}")
-        ColorPrinter.print_important_message(f"service -> generate() githubRepositoryName: {githubRepositoryName}")
-        ColorPrinter.print_important_message(f"service -> generate() githubBranchName: {githubBranchName}")
+        # userName = args[0]
+        ColorPrinter.print_important_message(f"service -> generate() userName: {userName}, type: {type(userName)}")
+        # githubRepositoryName = args[1]
+        ColorPrinter.print_important_message(f"service -> generate() githubRepositoryName: {githubRepositoryName}, type: {type(githubRepositoryName)}")
+        # githubBranchName = args[2]
+        ColorPrinter.print_important_message(f"service -> generate() githubBranchName: {githubBranchName}, type: {type(githubBranchName)}")
 
         ColorPrinter.print_important_message("Before clone the repository.")
-        # await self.__githubProcessingRepository.cloneRepository(userName, githubRepositoryName)
+        await self.__githubProcessingRepository.cloneRepository(userName, githubRepositoryName, githubBranchName)
         githubRepositoryPath = f"./github_repositories/{githubRepositoryName}"
         ColorPrinter.print_important_message("After clone the repository.")
 
         ColorPrinter.print_important_message("Before get text from the source code.")
         textFromSourceCode = await self.__textProcessingRepository.getTextFromSourceCode(githubRepositoryPath)
         ColorPrinter.print_important_message("After get text from the source code.")
+
+        ColorPrinter.print_important_message("Before remove github repository.")
+        await self.__githubProcessingRepository.deleteRepository(githubRepositoryPath)
+        ColorPrinter.print_important_message("After remove github repository.")
 
         ColorPrinter.print_important_message("Before generate backlog by openai.")
         generatedBacklog = await self.__generateBacklogRepository.generateBacklogByOpenAI(textFromSourceCode)
@@ -61,6 +71,10 @@ class GenerateResultReportServiceImpl(GenerateResultReportService):
         ColorPrinter.print_important_message("Before postprocessing text to backlog.")
         backlogList = await self.__textProcessingRepository.postprocessingTextToBacklogs(generatedBacklog)
         ColorPrinter.print_important_message("After postprocessing text to backlog.")
+
+        # userName = await self.__conditionalCustomExecutorRepository.operate("test", intermediateData=backlogList)
+        userToken = await self.__conditionalCustomExecutorService.operateConditionalCustomExecutorTestPoint(
+            "test", ipcExecutorConditionalCustomExecutorChannel, intermediateData=backlogList)
 
         ColorPrinter.print_important_message("Before generate the report.")
         generatedResultReport = await self.__generateResultReportRepository.generate(generatedBacklog)
