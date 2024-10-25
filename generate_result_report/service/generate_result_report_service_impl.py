@@ -37,14 +37,17 @@ class GenerateResultReportServiceImpl(GenerateResultReportService):
 
     async def generateResultReport(self, *args, ipcExecutorConditionalCustomExecutorChannel=None, **kwargs):
         loop = asyncio.get_running_loop()
-
-        ColorPrinter.print_important_message(f"generateResultReport(): {ipcExecutorConditionalCustomExecutorChannel}")
-
-        #data = args[1][1:-1].split(", ")
-        #userName = data[1][1:-1]
-        #githubRepositoryName = data[2][1:-1]
-        #githubBranchName = data[3][1:-1]
-        #ColorPrinter.print_important_message(f"service -> generate() data: {data}")
+        ColorPrinter.print_important_message(f"args: {args}")
+        ColorPrinter.print_important_message(f"args[0]: {args[0]}")
+        ColorPrinter.print_important_message(f"args[1]: {args[1]}")
+        ColorPrinter.print_important_message(f"args[2]: {args[2]}")
+        ColorPrinter.print_important_message(f"args[3]: {args[3]}")
+        # data = args[0][1:-1].split(", ")
+        # ColorPrinter.print_important_message(f"service -> generate() data: {data}")
+        # userName = data[0][1:-1]
+        # githubRepositoryName = data[1][1:-1]
+        # githubBranchName = data[2][1:-1]
+        # ColorPrinter.print_important_message(f"service -> generate() data: {data}")
 
         userName = args[0]
         ColorPrinter.print_important_message(f"service -> generate() userName: {userName}, type: {type(userName)}")
@@ -55,24 +58,39 @@ class GenerateResultReportServiceImpl(GenerateResultReportService):
         ipcExecutorConditionalCustomExecutorChannel = args[3]
         ColorPrinter.print_important_message(f"service -> generate() ipcExecutorConditionalCustomExecutorChannel: {ipcExecutorConditionalCustomExecutorChannel}")
         ColorPrinter.print_important_message("Before clone the repository.")
-        await self.__githubProcessingRepository.cloneRepository(userName, githubRepositoryName, githubBranchName)
+        try:
+            await self.__githubProcessingRepository.cloneRepository(userName, githubRepositoryName, githubBranchName)
+        except Exception as e:
+            ColorPrinter.print_important_message("An error occurred while cloning the repository.")
         githubRepositoryPath = f"./github_repositories/{githubRepositoryName}"
         ColorPrinter.print_important_message("After clone the repository.")
 
         ColorPrinter.print_important_message("Before get text from the source code.")
-        textFromSourceCode = await self.__textProcessingRepository.getTextFromSourceCode(githubRepositoryPath)
+        try:
+            textFromSourceCode = await self.__textProcessingRepository.getTextFromSourceCode(githubRepositoryPath)
+        except Exception as e:
+            ColorPrinter.print_important_message("An error occurred while getting text from source code.")
         ColorPrinter.print_important_message("After get text from the source code.")
 
         ColorPrinter.print_important_message("Before remove github repository.")
-        await self.__githubProcessingRepository.deleteRepository(githubRepositoryPath)
+        try:
+            await self.__githubProcessingRepository.deleteRepository(githubRepositoryPath)
+        except Exception as e:
+            ColorPrinter.print_important_message("An error occurred while deleting the repository.")
         ColorPrinter.print_important_message("After remove github repository.")
 
         ColorPrinter.print_important_message("Before generate backlog by openai.")
-        generatedBacklog = await self.__generateBacklogRepository.generateBacklogByOpenAI(textFromSourceCode)
+        try:
+            generatedBacklog = await self.__generateBacklogRepository.generateBacklogByOpenAI(textFromSourceCode)
+        except Exception as e:
+            ColorPrinter.print_important_message("An error occurred while generating backlog.")
         ColorPrinter.print_important_message("After generate backlog by openai.")
 
         ColorPrinter.print_important_message("Before postprocessing text to backlog.")
-        backlogList = await self.__textProcessingRepository.postprocessingTextToBacklogs(generatedBacklog)
+        try:
+            backlogList = await self.__textProcessingRepository.postprocessingTextToBacklogs(generatedBacklog)
+        except Exception as e:
+            ColorPrinter.print_important_message("An error occurred while postprocessing text to backlog.")
         ColorPrinter.print_important_message("After postprocessing text to backlog.")
 
         # userName = await self.__conditionalCustomExecutorRepository.operate("test", intermediateData=backlogList)
