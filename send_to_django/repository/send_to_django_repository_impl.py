@@ -20,7 +20,7 @@ class SendToDjangoRepositoryImpl(SendToDjangoRepository):
     def sendBacklogToDjango(self, ipcExecutorConditionalCustomExecutorChannel, userToken, backlogList):
         ipcExecutorConditionalCustomExecutorChannel.put(
             (
-                30,
+                12322,
                 {
                     "userToken": userToken,
                     "intermediateData": backlogList,
