@@ -9,6 +9,7 @@ from generate_backlog.repository.generate_backlog_repository_impl import Generat
 from generate_result_report.repository.generate_result_report_repository_impl import GenerateResultReportRepositoryImpl
 from generate_result_report.service.generate_result_report_service import GenerateResultReportService
 from github_processing.repository.github_processing_repository_impl import GithubProcessingRepositoryImpl
+from send_to_django.repository.send_to_django_repository_impl import SendToDjangoRepositoryImpl
 from template.utility.color_print import ColorPrinter
 from text_processing.repository.text_processing_repository_impl import TextProcessingRepositoryImpl
 
@@ -23,8 +24,7 @@ class GenerateResultReportServiceImpl(GenerateResultReportService):
             cls.__instance.__githubProcessingRepository = GithubProcessingRepositoryImpl.getInstance()
             cls.__instance.__generateBacklogRepository = GenerateBacklogRepositoryImpl.getInstance()
             cls.__instance.__textProcessingRepository = TextProcessingRepositoryImpl.getInstance()
-            # cls.__instance.__conditionalCustomExecutorRepository = ConditionalCustomExecutorTestPointRepositoryImpl.getInstance()
-            cls.__instance.__conditionalCustomExecutorService = ConditionalCustomExecutorTestPointServiceImpl.getInstance()
+            cls.__instance.__sendToDjangoRepository = SendToDjangoRepositoryImpl.getInstance()
 
         return cls.__instance
 
@@ -76,8 +76,10 @@ class GenerateResultReportServiceImpl(GenerateResultReportService):
         ColorPrinter.print_important_message("After postprocessing text to backlog.")
 
         # userName = await self.__conditionalCustomExecutorRepository.operate("test", intermediateData=backlogList)
-        userToken = await self.__conditionalCustomExecutorService.operateConditionalCustomExecutorTestPoint(
-            "test", ipcExecutorConditionalCustomExecutorChannel, intermediateData=backlogList)
+        userToken = await self.__sendToDjangoRepository.sendBacklogToDjango(
+            ipcExecutorConditionalCustomExecutorChannel, "test", backlogList)
+
+
 
         ColorPrinter.print_important_message("Before generate the report.")
         generatedResultReport = await self.__generateResultReportRepository.generate(generatedBacklog)
