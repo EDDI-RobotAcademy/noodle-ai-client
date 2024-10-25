@@ -1,4 +1,5 @@
 from send_to_django.repository.send_to_django_repository import SendToDjangoRepository
+from template.utility.color_print import ColorPrinter
 
 
 class SendToDjangoRepositoryImpl(SendToDjangoRepository):
@@ -17,15 +18,21 @@ class SendToDjangoRepositoryImpl(SendToDjangoRepository):
 
         return cls.__instance
 
-    def sendBacklogToDjango(self, ipcExecutorConditionalCustomExecutorChannel, userToken, backlogList):
-        ipcExecutorConditionalCustomExecutorChannel.put(
-            (
-                12322,
-                {
-                    "userToken": userToken,
-                    "intermediateData": backlogList,
-                    "tag": "backlog/create"
-                }
+    async def sendBacklogToDjango(self, ipcExecutorConditionalCustomExecutorChannel, userToken, backlogList):
+        ColorPrinter.print_important_message(f"ipcExecutorConditionalCustomExecutorChannel: {ipcExecutorConditionalCustomExecutorChannel}")
+        ColorPrinter.print_important_message(f"userToken: {userToken}")
+        ColorPrinter.print_important_message(f"backlogList: {backlogList}")
+        try:
+            ipcExecutorConditionalCustomExecutorChannel.put(
+                (
+                    12322,
+                    {
+                        "userToken": userToken,
+                        "intermediateData": backlogList,
+                        "tag": "/backlog/create"
+                    }
+                )
             )
-        )
+        except Exception as e:
+            ColorPrinter.print_important_message(f"An error while sending backlog to Django!: {e}")
 

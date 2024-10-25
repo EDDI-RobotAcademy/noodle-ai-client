@@ -63,14 +63,14 @@ if __name__ == "__main__":
         conditionalCustomExecutorService = ConditionalCustomExecutorServiceImpl.getInstance()
 
         # threadWorkerPoolService = ThreadWorkerPoolServiceImpl.getInstance()
-
-        for receiverId in range(4):
+        # TODO: 맥북 m2 스레드 최대 지원 개수가 12개임
+        for receiverId in range(3):
             threadWorkerPoolService.executeThreadPoolWorker(
                 f"Receiver-{receiverId}",
                 partial(receiverService.requestToReceiveCommand, receiverId)
             )
 
-        for analyzerId in range(4):
+        for analyzerId in range(2):
             threadWorkerPoolService.executeThreadPoolWorker(
                 f"CommandAnalyzer-{analyzerId}",
                 partial(commandAnalyzerService.analysisCommand, analyzerId)
@@ -82,7 +82,7 @@ if __name__ == "__main__":
                 partial(commandExecutorService.executeCommand, executorId)
             )
 
-        for conditionalCustomExecutorId in range(3):
+        for conditionalCustomExecutorId in range(2):
             threadWorkerPoolService.executeThreadPoolWorker(
                 f"ConditionalCustomExecutor-{conditionalCustomExecutorId}",
                 partial(conditionalCustomExecutorService.executeConditionalCustomCommand,
