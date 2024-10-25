@@ -43,6 +43,9 @@ if __name__ == "__main__":
         ColorPrinter.print_important_message("범용 운영체제 외에는 실행 할 수 없습니다!")
         exit(1)
 
+
+    threadWorkerPoolService = ThreadWorkerPoolServiceImpl.getInstance()
+
     try:
         clientSocketService = ClientSocketServiceImpl.getInstance()
         clientSocket = clientSocketService.createClientSocket()
@@ -59,7 +62,7 @@ if __name__ == "__main__":
 
         conditionalCustomExecutorService = ConditionalCustomExecutorServiceImpl.getInstance()
 
-        threadWorkerPoolService = ThreadWorkerPoolServiceImpl.getInstance()
+        # threadWorkerPoolService = ThreadWorkerPoolServiceImpl.getInstance()
 
         for receiverId in range(4):
             threadWorkerPoolService.executeThreadPoolWorker(
