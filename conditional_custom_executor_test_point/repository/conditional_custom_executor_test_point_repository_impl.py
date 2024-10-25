@@ -23,8 +23,8 @@ class ConditionalCustomExecutorTestPointRepositoryImpl(ConditionalCustomExecutor
 
     async def operate(self, *args, ipcExecutorConditionalCustomExecutorChannel=None, **kwargs):
         ColorPrinter.print_important_message(f"operate() -> args: {args}, kwargs: {kwargs}")
-        ipcExecutorConditionalCustomExecutorChannel = args[0]
-        userToken = args[1]
+        ipcExecutorConditionalCustomExecutorChannel = args[1]
+        userToken = args[0]
         intermediate_data_list = kwargs['intermediateData']
 
         ColorPrinter.print_important_message(f"Start Conditional Custom Executor operate() -> userToken: {userToken}")

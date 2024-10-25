@@ -35,22 +35,25 @@ class GenerateResultReportServiceImpl(GenerateResultReportService):
 
         return cls.__instance
 
-    async def generateResultReport(self, *args, ipcExecutorConditionalCustomExecutorChannel):
+    async def generateResultReport(self, *args, ipcExecutorConditionalCustomExecutorChannel=None, **kwargs):
         loop = asyncio.get_running_loop()
 
-        data = args[0][1:-1].split(", ")
-        userName = data[0][1:-1]
-        githubRepositoryName = data[1][1:-1]
-        githubBranchName = data[2][1:-1]
-        ColorPrinter.print_important_message(f"service -> generate() data: {data}")
+        ColorPrinter.print_important_message(f"generateResultReport(): {ipcExecutorConditionalCustomExecutorChannel}")
 
-        # userName = args[0]
+        #data = args[1][1:-1].split(", ")
+        #userName = data[1][1:-1]
+        #githubRepositoryName = data[2][1:-1]
+        #githubBranchName = data[3][1:-1]
+        #ColorPrinter.print_important_message(f"service -> generate() data: {data}")
+
+        userName = args[0]
         ColorPrinter.print_important_message(f"service -> generate() userName: {userName}, type: {type(userName)}")
-        # githubRepositoryName = args[1]
+        githubRepositoryName = args[1]
         ColorPrinter.print_important_message(f"service -> generate() githubRepositoryName: {githubRepositoryName}, type: {type(githubRepositoryName)}")
-        # githubBranchName = args[2]
+        githubBranchName = args[2]
         ColorPrinter.print_important_message(f"service -> generate() githubBranchName: {githubBranchName}, type: {type(githubBranchName)}")
-
+        ipcExecutorConditionalCustomExecutorChannel = args[3]
+        ColorPrinter.print_important_message(f"service -> generate() ipcExecutorConditionalCustomExecutorChannel: {ipcExecutorConditionalCustomExecutorChannel}")
         ColorPrinter.print_important_message("Before clone the repository.")
         await self.__githubProcessingRepository.cloneRepository(userName, githubRepositoryName, githubBranchName)
         githubRepositoryPath = f"./github_repositories/{githubRepositoryName}"
