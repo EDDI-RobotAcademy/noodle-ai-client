@@ -149,11 +149,11 @@ class GenerateResultReportServiceImpl(GenerateResultReportService):
         data = {
             "title": title,
             "overview": overview,
-            "techStack": extractedTechStack,
+            "skillList": extractedTechStack,
             "featureList": extractedFeatures,
             "usage": usage,
-            "improvement": improvement,
-            "scoreList": extractedScore
+            "improvementList": improvement,
+            "completionList": extractedScore
         }
         ColorPrinter.print_important_message(f"data: {data}")
 
