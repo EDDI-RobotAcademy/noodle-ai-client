@@ -27,7 +27,7 @@ class TextProcessingRepositoryImpl(TextProcessingRepository):
         return cls.__instance
 
     async def postprocessingTextToBacklogs(self, generatedBacklogsText):
-        pattern = r'\d+\. \*\*제목\*\*: (.*?)\n   - \*\*성공 기준\*\*: (.*?)\n   - \*\*도메인 분리\*\*: (.*?)\n   - \*\*작업 목록\*\*:(.*?)(?=\n\n|$)'
+        pattern = r'\d+\. \*\*백로그 제목\*\*: (.*?)\n   - \*\*Success Criteria\*\*: (.*?)\n   - \*\*도메인 이름\*\*: (.*?)\n   - \*\*To-do 목록\*\*:(.*?)(?=\n\n|$)'
         backlogItems = re.findall(pattern, generatedBacklogsText, re.DOTALL)
         backlogList = []
         for item in backlogItems:
