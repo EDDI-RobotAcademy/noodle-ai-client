@@ -48,14 +48,14 @@ class GenerateResultReportServiceImpl(GenerateResultReportService):
         # githubRepositoryName = data[1][1:-1]
         # githubBranchName = data[2][1:-1]
         # ColorPrinter.print_important_message(f"service -> generate() data: {data}")
-
-        userName = args[0]
+        userToken = args[0]
+        userName = args[3]
         ColorPrinter.print_important_message(f"service -> generate() userName: {userName}, type: {type(userName)}")
         githubRepositoryName = args[1]
         ColorPrinter.print_important_message(f"service -> generate() githubRepositoryName: {githubRepositoryName}, type: {type(githubRepositoryName)}")
         githubBranchName = args[2]
         ColorPrinter.print_important_message(f"service -> generate() githubBranchName: {githubBranchName}, type: {type(githubBranchName)}")
-        ipcExecutorConditionalCustomExecutorChannel = args[3]
+        ipcExecutorConditionalCustomExecutorChannel = args[4]
         ColorPrinter.print_important_message(f"service -> generate() ipcExecutorConditionalCustomExecutorChannel: {ipcExecutorConditionalCustomExecutorChannel}")
         ColorPrinter.print_important_message("Before clone the repository.")
         try:
@@ -86,6 +86,8 @@ class GenerateResultReportServiceImpl(GenerateResultReportService):
             ColorPrinter.print_important_message("An error occurred while generating backlog.")
         ColorPrinter.print_important_message("After generate backlog by openai.")
 
+        ColorPrinter.print_important_data("generatedBacklog", generatedBacklog)
+
         ColorPrinter.print_important_message("Before postprocessing text to backlog.")
         try:
             backlogList = await self.__textProcessingRepository.postprocessingTextToBacklogs(generatedBacklog)
@@ -94,8 +96,7 @@ class GenerateResultReportServiceImpl(GenerateResultReportService):
         ColorPrinter.print_important_message("After postprocessing text to backlog.")
 
         # userName = await self.__conditionalCustomExecutorRepository.operate("test", intermediateData=backlogList)
-        userToken = await self.__sendToDjangoRepository.sendBacklogToDjango(
-            ipcExecutorConditionalCustomExecutorChannel, "test", backlogList)
+        await self.__sendToDjangoRepository.sendBacklogToDjango(ipcExecutorConditionalCustomExecutorChannel, userToken, backlogList)
 
 
 
@@ -157,5 +158,5 @@ class GenerateResultReportServiceImpl(GenerateResultReportService):
         }
         ColorPrinter.print_important_message(f"data: {data}")
 
-        dataToJson = json.dumps(data, indent=2)
-        return {"message": dataToJson}
+        # dataToJson = json.dumps(data, indent=2)
+        return {"userToken": userToken, "message": data}
