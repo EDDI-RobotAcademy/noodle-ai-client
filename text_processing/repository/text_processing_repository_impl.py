@@ -82,10 +82,10 @@ class TextProcessingRepositoryImpl(TextProcessingRepository):
     async def extractSections(self, text: str):
         pattern_map = {
             "title": r"### 프로젝트 제목\s*-\s*(.*)### 프로젝트 개요",
-            "overview": r"### 프로젝트 개요\s*-\s*(.*)### 기술 스택",
+            "overview": r"### 프로젝트 개요\s*-*\s*(.*)### 기술 스택",
             "tech_stack": r"### 기술 스택(.*?)### 주요 기능",
             "features": r"### 주요 기능(.*?)### 활용 방안",
-            "usage": r"### 활용 방안\s*-\s*(.*)### 보완할 점",
+            "usage": r"### 활용 방안\s*-*\s*(.*)### 보완할 점",
             "improvement": r"### 보완할 점(.*?)### 완성도",
             "completion": r"### 완성도(.*)"
         }
