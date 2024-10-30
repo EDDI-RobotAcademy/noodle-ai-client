@@ -1,6 +1,14 @@
 import os
 import sys
 
+from conditional_custom_executor_multiple_user_test.service.conditional_custom_executor_multiple_user_test_service_impl import \
+    ConditionalCustomExecutorMultipleUserTestServiceImpl
+from conditional_custom_executor_multiple_user_test.service.request.conditional_custom_executor_multiple_user_test_request import \
+    ConditionalCustomExecutorMultipleUserTestRequest
+from conditional_custom_executor_multiple_user_test.service.response.conditional_custom_executor_backend_test_response import \
+    ConditionalCustomExecutorBackendTestResponse
+from conditional_custom_executor_multiple_user_test.service.response.conditional_custom_executor_multiple_user_test_response import \
+    ConditionalCustomExecutorMultipleUserTestResponse
 from conditional_custom_executor_test_point.service.conditional_custom_executor_test_point_service_impl import \
     ConditionalCustomExecutorTestPointServiceImpl
 from conditional_custom_executor_test_point.service.request.conditional_custom_executor_test_point_request import \
@@ -218,6 +226,36 @@ class UserDefinedProtocolRegister:
         )
 
     @staticmethod
+    def registerConditionalCustomExecutorMultipleUserTestProtocol():
+        customProtocolService = CustomProtocolServiceImpl.getInstance()
+        conditionalCustomExecutorMultipleUserTestService = ConditionalCustomExecutorMultipleUserTestServiceImpl.getInstance()
+
+        requestClassMapInstance = RequestClassMap.getInstance()
+        requestClassMapInstance.addRequestClass(
+            UserDefinedProtocolNumber.CONDITIONAL_CUSTOM_EXECUTOR_MULTIPLE_USER_TEST,
+            ConditionalCustomExecutorMultipleUserTestRequest
+        )
+
+        responseClassMapInstance = ResponseClassMap.getInstance()
+        responseClassMapInstance.addResponseClass(
+            UserDefinedProtocolNumber.CONDITIONAL_CUSTOM_EXECUTOR_MULTIPLE_USER_TEST,
+            ConditionalCustomExecutorMultipleUserTestResponse
+        )
+
+        customProtocolService.registerCustomProtocol(
+            UserDefinedProtocolNumber.CONDITIONAL_CUSTOM_EXECUTOR_MULTIPLE_USER_TEST,
+            conditionalCustomExecutorMultipleUserTestService.operateConditionalCustomExecutorMultipleUserTest
+        )
+
+    @staticmethod
+    def registerConditionalCustomExecutorBackendTestProtocol():
+        responseClassMapInstance = ResponseClassMap.getInstance()
+        responseClassMapInstance.addResponseClass(
+            UserDefinedProtocolNumber.CONDITIONAL_CUSTOM_EXECUTOR_BACKEND_TEST,
+            ConditionalCustomExecutorBackendTestResponse
+        )
+
+    @staticmethod
     def registerUserDefinedProtocol():
         UserDefinedProtocolRegister.registerGenerateBacklogProtocol()
         UserDefinedProtocolRegister.registerGenerateExampleBacklogProtocol()
@@ -230,3 +268,6 @@ class UserDefinedProtocolRegister:
         UserDefinedProtocolRegister.registerConditionalCustomExecutorIntermediateInfoProtocol()
 
         UserDefinedProtocolRegister.registerGenerateResultReportProtocol()
+
+        UserDefinedProtocolRegister.registerConditionalCustomExecutorMultipleUserTestProtocol()
+        UserDefinedProtocolRegister.registerConditionalCustomExecutorBackendTestProtocol()

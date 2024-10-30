@@ -15,6 +15,9 @@ class UserDefinedProtocolNumber(Enum):
     CONDITIONAL_CUSTOM_EXECUTOR_TEST_POINT = 12321
     CONDITIONAL_CUSTOM_EXECUTOR_INTERMEDIATE_INFO = 12322
 
+    CONDITIONAL_CUSTOM_EXECUTOR_MULTIPLE_USER_TEST = 12121
+    CONDITIONAL_CUSTOM_EXECUTOR_BACKEND_TEST = 12122
+
     @classmethod
     def hasValue(cls, value):
         return any(value == item.value for item in cls)
