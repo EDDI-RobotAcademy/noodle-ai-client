@@ -325,3 +325,12 @@ pyrightconfig.json
 
 # exclude .txt files except requirements
 !requirements.txt
+
+# exclude mlx_models folder
+/mlx_models
+
+# exclude nltk_data folder
+/nltk_data
+
+# exclude meeting-recording-download folder
+/meeting-recording-download

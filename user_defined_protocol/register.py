@@ -26,6 +26,10 @@ from generate_result_report.service.response.generate_result_report_response imp
 from massive_packet_test_point.service.massive_packet_test_point_service_impl import MassivePacketTestPointServiceImpl
 from massive_packet_test_point.service.request.massive_packet_test_point_request import MassivePacketTestPointRequest
 from massive_packet_test_point.service.response.massive_packet_test_point_response import MassivePacketTestPointResponse
+from meeting_recording_summary.service.meeting_recording_summary_service_impl import MeetingRecordingSummaryServiceImpl
+from meeting_recording_summary.service.request.meeting_recording_summary_request import MeetingRecordingSummaryRequest
+from meeting_recording_summary.service.response.meeting_recording_summary_response import \
+    MeetingRecordingSummaryResponse
 from multiple_user_test_point.service.multiple_user_test_point_service_impl import MultipleUserTestPointServiceImpl
 from multiple_user_test_point.service.request.user_test_point_request import UserTestPointRequest
 from multiple_user_test_point.service.response.user_test_point_response import UserTestPointResponse
@@ -256,6 +260,28 @@ class UserDefinedProtocolRegister:
         )
 
     @staticmethod
+    def registerMeetingRecordingSummaryProtocol():
+        customProtocolService = CustomProtocolServiceImpl.getInstance()
+        meetingRecordingSummaryService = MeetingRecordingSummaryServiceImpl.getInstance()
+
+        requestClassMapInstance = RequestClassMap.getInstance()
+        requestClassMapInstance.addRequestClass(
+            UserDefinedProtocolNumber.MEETING_RECORDING_SUMMARY_PROTOCOL_NUMBER,
+            MeetingRecordingSummaryRequest
+        )
+
+        responseClassMapInstance = ResponseClassMap.getInstance()
+        responseClassMapInstance.addResponseClass(
+            UserDefinedProtocolNumber.MEETING_RECORDING_SUMMARY_PROTOCOL_NUMBER,
+            MeetingRecordingSummaryResponse
+        )
+
+        customProtocolService.registerCustomProtocol(
+            UserDefinedProtocolNumber.MEETING_RECORDING_SUMMARY_PROTOCOL_NUMBER,
+            meetingRecordingSummaryService.getSummary
+        )
+
+    @staticmethod
     def registerUserDefinedProtocol():
         UserDefinedProtocolRegister.registerGenerateBacklogProtocol()
         UserDefinedProtocolRegister.registerGenerateExampleBacklogProtocol()
@@ -271,3 +297,5 @@ class UserDefinedProtocolRegister:
 
         UserDefinedProtocolRegister.registerConditionalCustomExecutorMultipleUserTestProtocol()
         UserDefinedProtocolRegister.registerConditionalCustomExecutorBackendTestProtocol()
+
+        UserDefinedProtocolRegister.registerMeetingRecordingSummaryProtocol()
