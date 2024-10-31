@@ -5,3 +5,6 @@ class MeetingRecordingSummaryRepository(ABC):
     def extractTextFromWebm(self, filePath):
         pass
 
+    @abstractmethod
+    def getSummarizedText(self, text):
+        pass

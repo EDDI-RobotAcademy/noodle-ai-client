@@ -36,3 +36,6 @@ class MeetingRecordingSummaryServiceImpl(MeetingRecordingSummaryService):
         filePath = f"{self.DOWNLOAD_PATH}/{fileName}"
         await self.__s3DownloadRepository.downloadFile(fileName, filePath)
         text = await self.__meetingRecordingSummaryRepository.extractTextFromWebm(filePath)
+        summarizedText = await self.__meetingRecordingSummaryRepository.getSummarizedText(text)
+
+        return {"userToken": userToken, "message": summarizedText}

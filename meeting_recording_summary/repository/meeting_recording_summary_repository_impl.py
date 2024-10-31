@@ -37,3 +37,22 @@ class MeetingRecordingSummaryRepositoryImpl(MeetingRecordingSummaryRepository):
 
         return result['text']
 
+    async def getSummarizedText(self, text):
+        inputText = f"summarize: \n{text}"
+        ColorPrinter.print_important_message("Before SUMMARIZATION_TOKENIZER")
+        inputs = self.SUMMARIZATION_TOKENIZER([inputText], max_length=2048, truncation=True, return_tensors="pt")
+        ColorPrinter.print_important_message("After SUMMARIZATION_TOKENIZER")
+        ColorPrinter.print_important_message("Before SUMMARIZATION_MODEL generate")
+        output = self.SUMMARIZATION_MODEL.generate(**inputs, num_beams=3, do_sample=True, min_length=10, max_length=256)
+        ColorPrinter.print_important_message("After SUMMARIZATION_MODEL generate")
+        ColorPrinter.print_important_message("Before SUMMARIZATION_TOKENIZER batch_decode")
+        decodedOutput = self.SUMMARIZATION_TOKENIZER.batch_decode(output, skip_special_tokens=True)[0]
+        ColorPrinter.print_important_message("After SUMMARIZATION_TOKENIZER batch_decode")
+        ColorPrinter.print_important_message("Before nltk sent_tokenize")
+        result = nltk.sent_tokenize(decodedOutput.strip())[0]
+        ColorPrinter.print_important_message("After nltk sent_tokenize")
+
+        print("getSummarizedText result:", result)
+
+        return result
+
