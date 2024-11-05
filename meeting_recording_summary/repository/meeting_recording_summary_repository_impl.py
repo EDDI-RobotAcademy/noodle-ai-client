@@ -1,28 +1,34 @@
 import asyncio
+import os
 
 import nltk
+from dotenv import load_dotenv
 from lightning_whisper_mlx import LightningWhisperMLX
 from llama_cpp import Llama
 from mlx_lm import load, generate
+from openai import OpenAI
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 from meeting_recording_summary.repository.meeting_recording_summary_repository import MeetingRecordingSummaryRepository
 from template.utility.color_print import ColorPrinter
 
 
+load_dotenv()
+
 class MeetingRecordingSummaryRepositoryImpl(MeetingRecordingSummaryRepository):
     __instance = None
-    WHISPER_MODEL = LightningWhisperMLX(model="large-v3", batch_size=12, quant="8bit")
+    WHISPER_MODEL = LightningWhisperMLX(model="large-v3", batch_size=12, quant="4bit")
     LANGUAGE = "ko"
     # MODEL_NAME = 'eenzeenee/t5-base-korean-summarization'
     # SUMMARIZATION_MODEL = AutoModelForSeq2SeqLM.from_pretrained(MODEL_NAME)
     # SUMMARIZATION_TOKENIZER = AutoTokenizer.from_pretrained(MODEL_NAME)
-    REPO_ID = "bartowski/Llama-3.2-1B-Instruct-GGUF"
-    FILENAME = "Llama-3.2-1B-Instruct-Q4_K_M.gguf"
-    SUMMARIZATION_MODEL = Llama.from_pretrained(
-        repo_id=REPO_ID, filename=FILENAME, n_gpu_layers=-1, n_ctx=2048, flash_attn=True)
+    # REPO_ID = "bartowski/Llama-3.2-1B-Instruct-GGUF"
+    # FILENAME = "Llama-3.2-1B-Instruct-Q4_K_M.gguf"
+    # SUMMARIZATION_MODEL = Llama.from_pretrained(
+    #     repo_id=REPO_ID, filename=FILENAME, n_gpu_layers=-1, n_ctx=2048, flash_attn=True)
 
     model, tokenizer = load("mlx-community/gemma-2-2b-it-4bit")
+    client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
     def __new__(cls):
         if cls.__instance is None:
@@ -45,6 +51,18 @@ class MeetingRecordingSummaryRepositoryImpl(MeetingRecordingSummaryRepository):
 
         return result['text']
 
+    async def extractTextFromWebmUsingWhisper(self, filePath):
+        audioFile = open(filePath, "rb")
+        transcription = self.client.audio.transcriptions.create(
+            model="whisper-1",
+            file=audioFile
+        )
+
+        result = transcription['text']
+        print(f"extractTextFromWebmUsingWhisper Result: {result}")
+
+        return result
+
     # async def getSummarizedText(self, text):
     #     inputText = f"summarize: \n{text}"
     #     ColorPrinter.print_important_message("Before SUMMARIZATION_TOKENIZER")
@@ -64,17 +82,17 @@ class MeetingRecordingSummaryRepositoryImpl(MeetingRecordingSummaryRepository):
     #
     #     return result
 
-    async def getSummarizedText(self, text):
-        messages = [
-            {
-                "role": 'user',
-                "content": f"다음 내용을 요약해주세요. 사용자의 요청에 맞는 대답인지 스스로 검증한 후, 필요한 대답만 해주세요.\n\n내용: {text}\n\n대답:"
-            }
-        ]
-        summarizedText = self.SUMMARIZATION_MODEL.create_chat_completion(messages=messages)
-        ColorPrinter.print_important_data("summarizedText:", summarizedText)
-
-        return summarizedText['choices'][0]['message']['content']
+    # async def getSummarizedText(self, text):
+    #     messages = [
+    #         {
+    #             "role": 'user',
+    #             "content": f"다음 내용을 요약해주세요. 사용자의 요청에 맞는 대답인지 스스로 검증한 후, 필요한 대답만 해주세요.\n\n내용: {text}\n\n대답:"
+    #         }
+    #     ]
+    #     summarizedText = self.SUMMARIZATION_MODEL.create_chat_completion(messages=messages)
+    #     ColorPrinter.print_important_data("summarizedText:", summarizedText)
+    #
+    #     return summarizedText['choices'][0]['message']['content']
 
     async def get(self, text):
         return generate(self.model, self.tokenizer,
