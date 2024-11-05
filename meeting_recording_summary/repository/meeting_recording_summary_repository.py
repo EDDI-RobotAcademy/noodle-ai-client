@@ -6,5 +6,13 @@ class MeetingRecordingSummaryRepository(ABC):
         pass
 
     @abstractmethod
-    def getSummarizedText(self, text):
+    def extractTextFromWebmUsingWhisper(self, filePath):
+        pass
+
+    # @abstractmethod
+    # def getSummarizedText(self, text):
+    #     pass
+
+    @abstractmethod
+    def get(self, text):
         pass

@@ -28,8 +28,10 @@ from massive_packet_test_point.service.request.massive_packet_test_point_request
 from massive_packet_test_point.service.response.massive_packet_test_point_response import MassivePacketTestPointResponse
 from meeting_recording_summary.service.meeting_recording_summary_service_impl import MeetingRecordingSummaryServiceImpl
 from meeting_recording_summary.service.request.meeting_recording_summary_request import MeetingRecordingSummaryRequest
+from meeting_recording_summary.service.request.openai_whisper_request import OpenAIWhisperRequest
 from meeting_recording_summary.service.response.meeting_recording_summary_response import \
     MeetingRecordingSummaryResponse
+from meeting_recording_summary.service.response.openai_whisper_response import OpenAIWhisperResponse
 from multiple_user_test_point.service.multiple_user_test_point_service_impl import MultipleUserTestPointServiceImpl
 from multiple_user_test_point.service.request.user_test_point_request import UserTestPointRequest
 from multiple_user_test_point.service.response.user_test_point_response import UserTestPointResponse
@@ -282,6 +284,28 @@ class UserDefinedProtocolRegister:
         )
 
     @staticmethod
+    def registerOpenAIWhisperProtocol():
+        customProtocolService = CustomProtocolServiceImpl.getInstance()
+        meetingRecordingSummaryService = MeetingRecordingSummaryServiceImpl.getInstance()
+
+        requestClassMapInstance = RequestClassMap.getInstance()
+        requestClassMapInstance.addRequestClass(
+            UserDefinedProtocolNumber.OPENAI_WHISPER_PROTOCOL_NUMBER,
+            OpenAIWhisperRequest
+        )
+
+        responseClassMapInstance = ResponseClassMap.getInstance()
+        responseClassMapInstance.addResponseClass(
+            UserDefinedProtocolNumber.OPENAI_WHISPER_PROTOCOL_NUMBER,
+            OpenAIWhisperResponse
+        )
+
+        customProtocolService.registerCustomProtocol(
+            UserDefinedProtocolNumber.OPENAI_WHISPER_PROTOCOL_NUMBER,
+            meetingRecordingSummaryService.getOpenAIWhisperSummary
+        )
+
+    @staticmethod
     def registerUserDefinedProtocol():
         UserDefinedProtocolRegister.registerGenerateBacklogProtocol()
         UserDefinedProtocolRegister.registerGenerateExampleBacklogProtocol()
@@ -299,3 +323,4 @@ class UserDefinedProtocolRegister:
         UserDefinedProtocolRegister.registerConditionalCustomExecutorBackendTestProtocol()
 
         UserDefinedProtocolRegister.registerMeetingRecordingSummaryProtocol()
+        UserDefinedProtocolRegister.registerOpenAIWhisperProtocol()
