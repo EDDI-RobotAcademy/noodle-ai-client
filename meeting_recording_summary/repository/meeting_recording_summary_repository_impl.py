@@ -110,7 +110,7 @@ class MeetingRecordingSummaryRepositoryImpl(MeetingRecordingSummaryRepository):
             ]
         )
 
-        summary = text.choices[0].message
+        summary = text.choices[0].message.content
         print('summary:', summary)
 
         return summary
