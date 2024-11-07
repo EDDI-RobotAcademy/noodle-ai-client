@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from lightning_whisper_mlx import LightningWhisperMLX
 from llama_cpp import Llama
 from mlx_lm import load, generate
-from openai import OpenAI
+from openai import OpenAI, AsyncOpenAI
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 from meeting_recording_summary.repository.meeting_recording_summary_repository import MeetingRecordingSummaryRepository
@@ -28,7 +28,7 @@ class MeetingRecordingSummaryRepositoryImpl(MeetingRecordingSummaryRepository):
     #     repo_id=REPO_ID, filename=FILENAME, n_gpu_layers=-1, n_ctx=2048, flash_attn=True)
 
     model, tokenizer = load("mlx-community/gemma-2-2b-it-4bit")
-    client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+    client = AsyncOpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
     def __new__(cls):
         if cls.__instance is None:
@@ -53,12 +53,12 @@ class MeetingRecordingSummaryRepositoryImpl(MeetingRecordingSummaryRepository):
 
     async def extractTextFromWebmUsingWhisper(self, filePath):
         audioFile = open(filePath, "rb")
-        transcription = self.client.audio.transcriptions.create(
+        transcription = await self.client.audio.transcriptions.create(
             model="whisper-1",
             file=audioFile
         )
 
-        result = transcription['text']
+        result = transcription.text
         print(f"extractTextFromWebmUsingWhisper Result: {result}")
 
         return result
@@ -98,3 +98,19 @@ class MeetingRecordingSummaryRepositoryImpl(MeetingRecordingSummaryRepository):
         return generate(self.model, self.tokenizer,
                         prompt=f"다음 내용을 요약해주세요. 요약한 내용이 입력된 내용을 설명할 수 있는지 스스로 검증하고 대답하세요.\n"
                                f"**내용**: {text}\n\n**대답**:")
+
+    async def getSummaryFromTextUsingOpenAIAPI(self, text):
+        text = await self.client.chat.completions.create(
+            model='gpt-4o-mini',
+            messages=[
+                {'role': 'system', 'content': 'You are a helpful assistant. 사용자가 입력한 내용을 요약해주세요. '
+                                              '대답하기 전에 요약 내용이 입력 내용을 충분히 설명할 수 있는지 스스로 검증하고 대답하세요.'
+                                              '요약 내용 이외에 다른 내용은 출력하지마세요.'},
+                {'role': 'user', 'content': f'입력 내용: {text}'}
+            ]
+        )
+
+        summary = text.choices[0].message
+        print('summary:', summary)
+
+        return summary
