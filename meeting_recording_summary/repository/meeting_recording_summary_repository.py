@@ -16,3 +16,7 @@ class MeetingRecordingSummaryRepository(ABC):
     @abstractmethod
     def get(self, text):
         pass
+
+    @abstractmethod
+    def getSummaryFromTextUsingOpenAIAPI(self, text):
+        pass
